@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.cache/
+.DS_Store
+*.bin
+*.gen
+*.smd
+*.sav
+*.srm
+*.state
+.env
+.env.*
+roms/
+*.rom
+*.zip
+*.7z
