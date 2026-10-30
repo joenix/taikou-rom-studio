@@ -1,0 +1,20 @@
+{
+  "baselineSha256": "1914e94a23d54d6e6e797d5d97ebd17fb8d5017f6a75d9b89e656590ffbe4975",
+  "entryExtension": {
+    "nativeRoutines": ["0xf98a", "0xf9f0"],
+    "source": "004f0000",
+    "target": "03da0105",
+    "bothMatched": true,
+    "existingEntryPreserved": true,
+    "existingReturnPreserved": true,
+    "newTownClassifierVariants": 12,
+    "independentNewTownPlayable": false
+  },
+  "disableExperiment": {
+    "entryDisabledInBothNativeRoutines": true,
+    "returnLookup": "0xffff",
+    "safeDeletion": false
+  },
+  "originalRomAndSaveUnchanged": true,
+  "scope": "Bounded native function calls from a supplied state; not cold-start, gameplay or save migration acceptance"
+}

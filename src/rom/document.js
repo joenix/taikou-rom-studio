@@ -1,3 +1,4 @@
+import {inspectWorldMap,readWorldMap,requireWorldMap,makeTerrainPatches,makePlacePatches} from './world-map.js';
 import {PROFILE,STATS,SKILLS,RANKS,hex} from './profile.js';
 import {validateRom} from './validate.js';
 import {span,u16,decodeText,encodeField,integer,fail,checksum} from './codec.js';
@@ -20,6 +21,16 @@ export class RomDocument {
  get changedBytes(){let n=0;for(let i=0;i<this.#bytes.length;i++)if(this.#bytes[i]!==this.#original[i])n++;return n;}
  get originalBytes(){return new Uint8Array(this.#original);}
  get workingBytes(){return new Uint8Array(this.#bytes);}
+ get mapCapability(){return inspectWorldMap(this.#bytes);}
+ mapSnapshot(){return readWorldMap(this.#bytes);}
+ applyMap(kind,id,draft,expectedRevision=this.revision){
+  if(expectedRevision!==this.revision)fail('STALE_DRAFT','地图已变化，请重新打开编辑窗口');
+  const result=kind==='map-terrain'?makeTerrainPatches(this.#bytes,draft):makePlacePatches(this.#bytes,kind,id,draft);
+  if(!result.patches.length)return false;
+  const candidate=new Uint8Array(this.#bytes);for(const patch of result.patches)candidate[patch.offset]=patch.after;
+  validateRom(candidate,{verifyChecksum:false});requireWorldMap(candidate);
+  this.#bytes=candidate;this.#undo.push({kind,id,label:result.label,patches:result.patches});this.#redo=[];this.revision++;return true;
+ }
  readPerson(id){
   integer(id,0,712,'武将 ID');const b=this.#bytes,p=PROFILE.people.base+id*60,n=PROFILE.names.base+id*16;
   const family=decodeText(b,n+2,6),given=decodeText(b,n+8,8);
@@ -98,6 +109,7 @@ export class RomDocument {
  redo(){const t=this.#redo.pop();if(!t)return false;for(const p of t.patches)this.#bytes[p.offset]=p.after;this.#undo.push(t);this.revision++;return true;}
  exportBytes(){
   validateRom(this.#bytes,{verifyChecksum:false});
+  if(this.#undo.some(t=>t.kind.startsWith('map-')))requireWorldMap(this.#bytes);
   const permitted=new Set(this.#undo.flatMap(t=>t.patches.map(p=>p.offset)));
   for(let i=0;i<this.#bytes.length;i++)if(this.#bytes[i]!==this.#original[i]&&!permitted.has(i))fail('UNTRACKED_WRITE','存在不属于单条编辑事务的修改',{offset:i});
   const bytes=new Uint8Array(this.#bytes);const sum=checksum(bytes);bytes[0x18e]=sum>>>8;bytes[0x18f]=sum&255;validateRom(bytes);return bytes;

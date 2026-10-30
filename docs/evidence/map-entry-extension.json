@@ -1,0 +1,85 @@
+{
+  "experimental": true,
+  "playableRelease": false,
+  "sourceSha256": "1914e94a23d54d6e6e797d5d97ebd17fb8d5017f6a75d9b89e656590ffbe4975",
+  "outputSha256": "04c80cde3144d39cc43d249b93b584f2473eac2a714f328ed2f606ad71c59aba",
+  "sourceLength": 1310720,
+  "outputLength": 1310946,
+  "table": 1310720,
+  "flags": 1310888,
+  "bases": 1310910,
+  "location": {
+    "x": 304,
+    "y": 8,
+    "mapId": 79,
+    "block": 2,
+    "localX": 0,
+    "localY": 0,
+    "offset": 788582
+  },
+  "entry": "004f000003da0105",
+  "newTownClassifier": {
+    "id": 17,
+    "map": 1280,
+    "sceneAllocated": false
+  },
+  "patches": [
+    {
+      "offset": "0xf958",
+      "before": "000d30da",
+      "after": "00140000"
+    },
+    {
+      "offset": "0xf9a8",
+      "before": "000d30da",
+      "after": "00140000"
+    },
+    {
+      "offset": "0xfa0e",
+      "before": "000d30da",
+      "after": "00140000"
+    },
+    {
+      "offset": "0xf932",
+      "before": "000d30d2",
+      "after": "0013fff8"
+    },
+    {
+      "offset": "0xfa4c",
+      "before": "000d317a",
+      "after": "001400a8"
+    },
+    {
+      "offset": "0xf9e6",
+      "before": "0014",
+      "after": "0015"
+    },
+    {
+      "offset": "0xfa60",
+      "before": "0014",
+      "after": "0015"
+    },
+    {
+      "offset": "0x7486",
+      "before": "000761c6",
+      "after": "001400be"
+    },
+    {
+      "offset": "0x74bc",
+      "before": "0011",
+      "after": "0012"
+    },
+    {
+      "offset": "0x1a4",
+      "before": "0013ffff",
+      "after": "001400e1"
+    }
+  ],
+  "limitations": [
+    "第21个入口复用既有町内部，不能称为新增独立町",
+    "0x500 仅用于分类函数实验，未分配场景与商店",
+    "删除实验保持稳定ID，只停用入口，不处理旧存档与剧情",
+    "城池RAM布局、初始化和存档均未扩容"
+  ],
+  "output": "/tmp/taikou-extra-entrance.bin"
+}

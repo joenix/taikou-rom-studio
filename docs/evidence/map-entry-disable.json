@@ -1,0 +1,24 @@
+{
+  "experimental": true,
+  "mode": "disable",
+  "playableRelease": false,
+  "sourceSha256": "1914e94a23d54d6e6e797d5d97ebd17fb8d5017f6a75d9b89e656590ffbe4975",
+  "outputSha256": "07589cb361b788e9fa4264adf48ef6fa6f9d65439ba3f006b4c5757687cde329",
+  "entry": "00ca020203da0105",
+  "townBase": 984,
+  "location": {
+    "x": 306,
+    "y": 34,
+    "mapId": 202,
+    "block": 24,
+    "localX": 2,
+    "localY": 2,
+    "offset": 790008
+  },
+  "fillCode": 19,
+  "limitations": [
+    "仅停用第0町的入口",
+    "原生回程仍会得到0xffff，证明不能作为可交付删除方案"
+  ],
+  "output": "/tmp/taikou-disabled-entrance.bin"
+}

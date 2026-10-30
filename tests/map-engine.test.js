@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {mapFixture} from './map-fixture.js';
+import {buildEntranceExperiment,buildDisableExperiment} from '../tools/research/map-engine.mjs';
+import {checksum} from '../src/rom/codec.js';
+import {WORLD} from '../src/rom/world-map.js';
+function engineFixture(){const b=mapFixture(),long=(p,n)=>b.set([n>>>24,(n>>>16)&255,(n>>>8)&255,n&255],p);for(const p of [0xf958,0xf9a8,0xfa0e])long(p,WORLD.townEntrances);long(0xf932,WORLD.townEntrances-8);long(0xfa4c,0xd317a);for(const p of [0xf9e6,0xfa60])b.set([0,20],p);b.set([0,17],0x74bc);long(0x1a4,b.length-1);const sum=checksum(b);b[0x18e]=sum>>>8;b[0x18f]=sum&255;return b;}
+test('入口扩展实验原址不变、全部已知入口用户迁移，独立分类实验不伪装可玩新町',()=>{const source=engineFixture(),before=source.slice(),{bytes,report}=buildEntranceExperiment(source);assert.deepEqual(source,before);assert.equal(report.playableRelease,false);assert.equal(report.newTownClassifier.sceneAllocated,false);assert.deepEqual(bytes.slice(report.table,report.table+160),source.slice(WORLD.townEntrances,WORLD.townEntrances+160));assert.equal(bytes[0xf9e7],21);assert.equal(bytes[0xfa61],21);const allowed=new Set([0x18e,0x18f,report.location.offset,...report.patches.flatMap(p=>Array.from({length:p.before.length/2},(_,i)=>parseInt(p.offset)+i))]);for(let i=0;i<source.length;i++)if(source[i]!==bytes[i])assert.ok(allowed.has(i),i.toString(16));});
+test('实验布局不匹配时立即抛异常，不生成猜测补丁',()=>{const source=engineFixture();source[0xf932]^=1;const sum=checksum(source);source[0x18e]=sum>>>8;source[0x18f]=sum&255;assert.throws(()=>buildEntranceExperiment(source),e=>e.code==='RESEARCH_SIGNATURE_MISMATCH');});
+test('停用入口实验保留 ID 和内部目标，明确标记不可交付',()=>{const source=engineFixture(),before=source.slice(),{bytes,report}=buildDisableExperiment(source);assert.deepEqual(source,before);assert.equal(bytes[WORLD.townEntrances],255);assert.equal(bytes[WORLD.townEntrances+1],255);assert.deepEqual(bytes.slice(WORLD.townEntrances+2,WORLD.townEntrances+8),source.slice(WORLD.townEntrances+2,WORLD.townEntrances+8));assert.equal(bytes[report.location.offset],19);assert.equal(report.playableRelease,false);});
