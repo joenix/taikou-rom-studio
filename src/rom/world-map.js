@@ -1,3 +1,5 @@
+import {verifyTownEngine} from './town-engine.js';
+import {readMapExtension} from './map-extension.js';
 import {span,u16,decodeText,encodeField,integer,fail} from './codec.js';
 import {PROFILE,hex} from './profile.js';
 export const WORLD=Object.freeze({columns:41,rows:24,blockSize:8,width:328,height:192,indexBase:0x764a8,dataBase:0xc0826,blocks:521,townPointers:0x75d36,townBases:0x761c6,townEntrances:0xd30da,overviewBase:0xbfcdc});
@@ -11,34 +13,36 @@ export function mapCoordinate(bytes,x,y){
 function coordinate(mapId,x,y){return {mapId,localX:x,localY:y,x:(mapId%41)*8+x,y:Math.floor(mapId/41)*8+y};}
 function pointer(bytes,offset){return u16(bytes,offset)*65536+u16(bytes,offset+2);}
 function townName(bytes,id){
- const offset=pointer(bytes,WORLD.townPointers+id*4);if(offset<0x72000||offset>=0x74000)fail('INVALID_TOWN_NAME_POINTER','町名称指针超出已验证文本区',{record:id,offset});
- let length=0;while(length<24&&span(bytes,offset+length,1)[0]!==0)length++;
- if(!length||length===24)fail('INVALID_TOWN_NAME','町名称不存在或未终止',{record:id,offset});
- return {name:decodeText(bytes,offset,length),nameOffset:offset,nameCapacity:length};
+ const ext=readMapExtension(bytes);const offset=pointer(bytes,(ext?.names??WORLD.townPointers)+id*4);if((id<17&&(offset<0x72000||offset>=0x74000))||(id===17&&offset!==ext?.nameText))fail('INVALID_TOWN_NAME_POINTER','町名称指针超出已验证文本区',{record:id,offset});
+ let length=0;while(length<26&&span(bytes,offset+length,1)[0]!==0)length++;
+ if(!length||length===26)fail('INVALID_TOWN_NAME','町名称不存在或未终止',{record:id,offset});
+ return {name:decodeText(bytes,offset,length),nameOffset:offset,nameCapacity:id===17?24:length};
 }
 export function readMapPlaces(bytes){
+ const ext=readMapExtension(bytes);
  const castles=Array.from({length:123},(_,id)=>{
   const offset=PROFILE.castles.base+id*20,mapId=u16(bytes,offset+14),x=bytes[offset+16],y=bytes[offset+17];
   const aliases=[id];for(let i=123;i<125;i++){const p=PROFILE.castles.base+i*20;if(u16(bytes,p+14)===mapId&&bytes[p+16]===x&&bytes[p+17]===y)aliases.push(i);}
   return {kind:'map-castle',id,key:`castle:${id}`,name:decodeText(bytes,offset,9),offset,aliases,entrances:[{...coordinate(mapId,x,y),offset:offset+14,width:2}],...coordinate(mapId,x,y),overview:{x:bytes[WORLD.overviewBase+id*2],y:bytes[WORLD.overviewBase+id*2+1]}};
  });
- const entrances=Array.from({length:20},(_,slot)=>{const p=WORLD.townEntrances+slot*8;return {slot,offset:p,...coordinate(u16(bytes,p),bytes[p+2],bytes[p+3]),targetMap:u16(bytes,p+4),targetX:bytes[p+6],targetY:bytes[p+7],width:1};});
- const towns=Array.from({length:17},(_,id)=>{
-  const base=u16(bytes,WORLD.townBases+id*2),rows=entrances.filter(e=>[0,41,82].some(bank=>e.targetMap>=base+bank&&e.targetMap<base+bank+4));
+ const entrances=Array.from({length:ext?21:20},(_,slot)=>{const p=(ext?.entries??WORLD.townEntrances)+slot*8;return {slot,offset:p,...coordinate(u16(bytes,p),bytes[p+2],bytes[p+3]),targetMap:u16(bytes,p+4),targetX:bytes[p+6],targetY:bytes[p+7],width:1};});
+ const towns=Array.from({length:ext?18:17},(_,id)=>{
+  const base=u16(bytes,(ext?.bases??WORLD.townBases)+id*2),rows=entrances.filter(e=>[0,41,82].some(bank=>e.targetMap>=base+bank&&e.targetMap<base+bank+4));
   if(!rows.length)fail('MISSING_TOWN_ENTRANCE','町缺少可识别的入口',{record:id});
-  return {kind:'map-town',id,key:`town:${id}`,...townName(bytes,id),offset:rows[0].offset,entrances:rows,...coordinate(rows[0].mapId,rows[0].localX,rows[0].localY)};
+  return {active:id!==17||ext?.active,editorCreated:id===17,kind:'map-town',id,key:`town:${id}`,...townName(bytes,id),offset:rows[0].offset,entrances:rows,...coordinate(rows[0].mapId,rows[0].localX,rows[0].localY)};
  });
- return {castles,towns,all:[...castles,...towns]};
+ return {castles,towns,all:[...castles,...towns.filter(p=>p.active)]};
 }
 export function inspectWorldMap(bytes){
  try{
-  for(const s of SIGNATURES){const actual=Array.from(span(bytes,s.offset,s.hex.length/2),b=>b.toString(16).padStart(2,'0')).join('');if(actual!==s.hex)fail('UNSUPPORTED_MAP_LAYOUT','大地图读取或入口代码不匹配',{offset:s.offset});}
+  const ext=readMapExtension(bytes);if(ext)verifyTownEngine(bytes,ext);
+  for(const s of SIGNATURES){if(ext&&[0xf9a6,0x7484].includes(s.offset))continue;const actual=Array.from(span(bytes,s.offset,s.hex.length/2),b=>b.toString(16).padStart(2,'0')).join('');if(actual!==s.hex)fail('UNSUPPORTED_MAP_LAYOUT','大地图读取或入口代码不匹配',{offset:s.offset});}
   span(bytes,WORLD.dataBase,WORLD.blocks*64);
   const blocks=new Set();for(let id=0;id<984;id++){const block=u16(bytes,WORLD.indexBase+id*2);if(block){if(block>521||blocks.has(block))fail('ALIASED_MAP_BLOCK','大地图分区超出范围或共享数据块，不能安全独立编辑',{mapId:id,block});blocks.add(block);}}
   if(blocks.size!==521)fail('INVALID_MAP_BLOCKS','大地图的分区数量不是已核验的 521');
   const places=readMapPlaces(bytes);
   const claimed=new Set();
-  const townSlots=places.towns.flatMap(p=>p.entrances.map(e=>e.slot));if(townSlots.length!==20||new Set(townSlots).size!==20)fail('AMBIGUOUS_TOWN_ENTRANCE','町入口分组不唯一或存在未识别入口');
+  const townSlots=places.towns.flatMap(p=>p.entrances.map(e=>e.slot));if(townSlots.length!==(ext?21:20)||new Set(townSlots).size!==(ext?21:20))fail('AMBIGUOUS_TOWN_ENTRANCE','町入口分组不唯一或存在未识别入口');
   for(const p of places.all)for(const e of p.entrances){
    if(e.mapId>=984||e.localX>7||e.localY>7||(p.kind==='map-castle'&&e.localX>6))fail('INVALID_MAP_LOCATION','地点坐标超出当前大地图布局',{kind:p.kind,record:p.id});
    for(let col=0;col<e.width;col++){const key=`${e.x+col},${e.y}`;if(claimed.has(key))fail('OVERLAPPING_MAP_PLACES','地点入口重叠',{record:p.id});claimed.add(key);}
@@ -46,7 +50,7 @@ export function inspectWorldMap(bytes){
    if(p.kind==='map-castle'&&(!(value&0x80)||((bytes[cell.offset+1]&0x88)!==0x88)))fail('MISSING_CASTLE_MARKER','城池入口与地图标记不一致',{record:p.id,offset:cell.offset});
    if(p.kind==='map-town'&&(value<0x40||value>0x42))fail('MISSING_TOWN_MARKER','町入口与地图标记不一致',{record:p.id,offset:cell.offset});
   }
-  return {supported:true,blocks:521,width:328,height:192,castles:123,towns:17};
+  return {supported:true,blocks:521,width:328,height:192,castles:123,towns:ext?.active?18:17};
  }catch(error){return {supported:false,error:{code:error.code||'MAP_ERROR',message:error.message,details:error.details}};}
 }
 export function requireWorldMap(bytes){const result=inspectWorldMap(bytes);if(!result.supported)fail(result.error.code,result.error.message,result.error.details);return result;}
@@ -80,7 +84,7 @@ export function makeTerrainPatches(bytes,draft){
 }
 export function makePlacePatches(bytes,kind,id,draft){
  requireWorldMap(bytes);const places=readMapPlaces(bytes),place=(kind==='map-castle'?places.castles:kind==='map-town'?places.towns:[]).find(p=>p.id===id);
- if(!place)fail('INVALID_MAP_PLACE','地点不存在');
+ if(!place)fail('INVALID_MAP_PLACE','地点不存在');if(place.active===false)fail('INACTIVE_TOWN','请先恢复停用的町，再编辑位置或名称');
  const allowed=kind==='map-castle'?['name','x','y','fillCode','overviewX','overviewY']:['name','x','y','fillCode'];
  for(const key of Object.keys(draft))if(!allowed.includes(key))fail('UNSUPPORTED_FIELD',`未开放地点字段 ${key}`);
  const edits=new Map();const add=(offset,data)=>{span(bytes,offset,data.length);for(let i=0;i<data.length;i++){if(bytes[offset+i]!==data[i])edits.set(offset+i,data[i]);else edits.delete(offset+i);}};

@@ -13,3 +13,15 @@ export function mapFixture(){
  for(let slot=0;slot<20;slot++){const id=slot<17?slot:[9,11,12][slot-17],sector=150+id,p=WORLD.townEntrances+slot*8,x=slot<17?2:3;word(p,sector);b[p+2]=x;b[p+3]=2;word(p+4,bases[id]+2);b[p+6]=1;b[p+7]=5;b[WORLD.dataBase+sector*64+16+x]=slot<17?64:66;}
  word(0x18e,checksum(b));return b;
 }
+
+export async function townFixture(){
+ const {TOWN_ENGINE_PATCHES,TOWN_ENGINE_COUNTS}=await import('../src/rom/town-engine.js');
+ const b=mapFixture(),put=(p,n)=>b.set([n>>>24,(n>>>16)&255,(n>>>8)&255,n&255],p);
+ for(const p of TOWN_ENGINE_PATCHES)put(p.offset,p.expected);
+ for(const [p,before]of TOWN_ENGINE_COUNTS){b[p]=before>>>8;b[p+1]=before&255;}
+ for(const p of [0x352c4,0x35322])b.set(Buffer.from('13fc000100ff0009','hex'),p);
+ // Real interior blocks and fresh merchant parameters, with no original shared slot.
+ for(let block=0;block<204;block++)b.fill(block%64,0xcc22e+block*64,0xcc22e+(block+1)*64);
+ for(const p of [0xd6918,0xd3622,0xd3a6e])b.fill(12,p,p+17);
+ put(0x1a4,b.length-1);const sum=checksum(b);b[0x18e]=sum>>>8;b[0x18f]=sum&255;return b;
+}

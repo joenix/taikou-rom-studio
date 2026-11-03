@@ -1,0 +1,24 @@
+{
+  "status": "PASS",
+  "rom_sha256": "99a49c5c10bad0cb4d1e8dc8a804d8d5e95566a69a44e549f14ea6e03b61cb96",
+  "native_snapshot_function": "0x1AE9C",
+  "compact_fields_hex": "186004d209290c1746505a00",
+  "confirmed_units": {
+    "funds": "raw word *10 貫",
+    "rice": "raw word *10 石",
+    "guns": "raw byte *100 丁",
+    "horses": "raw byte *100 頭",
+    "soldiers": "raw word 人",
+    "kokudaka": "raw byte 万石",
+    "control": "raw byte %",
+    "morale": "raw byte %"
+  },
+  "display_evidence": [
+    "0x1AF80 castle detail",
+    "0x1B102/0x1B144 funds/rice displays",
+    "0x1B188/0x1B1B8 horses/guns multiply100",
+    "0x8DAE..0x8DF8 relation low3bits and ancillary symbols"
+  ],
+  "scope": "isolated native snapshot after copying edited ROM initial-state record into private RAM; not cold-start full gameplay verification",
+  "fixture_unchanged": true
+}

@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "input_sha256": "e86b777c6073a73c123967a0406f65ca083af9bde4e1c92581578f91dcee1e4d",
+  "people_attributes_and_portrait": true,
+  "item_value_and_icon": true,
+  "map_cell_write": true,
+  "export_reload_checksum_valid": true,
+  "original_unchanged": true,
+  "scope": "memory-only export/reload; no new release, no full gameplay test"
+}

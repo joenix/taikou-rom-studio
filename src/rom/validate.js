@@ -1,18 +1,19 @@
-import {PROFILE} from './profile.js';
+import {itemIconTable} from './item-icons.js';
+import {PROFILE,RELEASE} from './profile.js';
 import {span,u16,decodeText,fail,checksum} from './codec.js';
 export function validateRom(bytes,{verifyChecksum=true}={}){
  if(!(bytes instanceof Uint8Array)||bytes.length<0x89f9a||bytes.length>16*1024*1024||bytes.length%2)fail('INVALID_SIZE','文件大小不符合支持的 MD 太阁 ROM 布局');
  const ascii=new TextDecoder('ascii');
  if(!ascii.decode(span(bytes,0x100,16)).startsWith('SEGA'))fail('NOT_MD_ROM','不是有效的 Mega Drive ROM；不支持压缩包或带交错头的 SMD 文件',{offset:0x100});
- // These files contain a legacy typo in the domestic title bytes; match verified bytes, not a corrected display name.
- if(Array.from(span(bytes,0x120,10),b=>b.toString(16).padStart(2,'0')).join('')!=='91be8d7d97a78e559360')fail('NOT_TAIKOU','ROM 游戏标识不是支持的《太阁立志传》',{offset:0x120});
+ if(ascii.decode(span(bytes,0x120,48)).trim()!==RELEASE.title||ascii.decode(span(bytes,0x150,48)).trim()!==RELEASE.title)fail('NOT_TAIKOU','仅支持 v1.40.02 调试修复版及其编辑导出文件',{offset:0x120});
+ for(const s of RELEASE.signatures){const actual=Array.from(span(bytes,s.offset,s.hex.length/2),b=>b.toString(16).padStart(2,'0')).join('');if(actual!==s.hex)fail('UNSUPPORTED_LAYOUT','v1.40.02 修复代码不匹配',{offset:s.offset});}
  for(const s of PROFILE.signatures){
   const value=Array.from(span(bytes,s.offset,s.hex.length/2),b=>b.toString(16).padStart(2,'0')).join('');
   if(value!==s.hex)fail('UNSUPPORTED_LAYOUT',`关键读取指令不匹配：${s.meaning}`,{offset:s.offset,expected:s.hex,actual:value});
  }
  for(let id=0;id<PROFILE.people.count;id++){
   const p=PROFILE.people.base+id*60,n=PROFILE.names.base+id*16;
-  span(bytes,p,60);span(bytes,n,16);
+  span(bytes,p,60);span(bytes,n,16);span(bytes,PROFILE.portraits.base+id*16,2);
   if(u16(bytes,p)!==id)fail('RECORD_ID_MISMATCH','武将记录编号不连续',{resource:'people',record:id,offset:p});
   if(!decodeText(bytes,n+2,6)||!decodeText(bytes,n+8,8))fail('EMPTY_NAME','武将姓名不能为空',{resource:'people',record:id,offset:n});
   if(bytes[p+0x1c]>8)fail('INVALID_RANK','武将身份编号超出已支持范围',{record:id,offset:p+0x1c});
@@ -33,6 +34,7 @@ export function validateRom(bytes,{verifyChecksum=true}={}){
   if(!decodeText(bytes,p,9))fail('EMPTY_NAME','城池名称不能为空',{resource:'castles',record:id,offset:p});
   for(let j=9;j<13;j++)if(bytes[p+j]!==255&&bytes[p+j]>=125)fail('INVALID_NEIGHBOR','城池邻接候选引用超出范围',{record:id,offset:p+j});
  }
+ itemIconTable(bytes);
  const storedChecksum=u16(bytes,0x18e),computedChecksum=checksum(bytes);
  if(verifyChecksum&&storedChecksum!==computedChecksum)fail('CHECKSUM_MISMATCH','MD 校验和不匹配，ROM 可能被损坏或未经正确导出',{offset:0x18e,expected:storedChecksum,actual:computedChecksum});
  return {profile:PROFILE.id,checks:7,storedChecksum,computedChecksum,checksumMatches:storedChecksum===computedChecksum};

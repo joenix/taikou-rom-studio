@@ -1,0 +1,2 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {oceanPreviewPixels} from '../src/rom/ocean-preview.js';
+test('海面补绘保留纹理差异和透明度，不改源图块',()=>{const source=new Uint8ClampedArray([0,70,180,255,20,90,210,255,0,0,0,0]),before=source.slice(),out=oceanPreviewPixels(source);assert.deepEqual(source,before);assert.notEqual(out,source);assert.equal(out.length,source.length);assert.equal(out[3],255);assert.equal(out[11],0);assert.ok(out[0]>source[0]&&out[1]>source[1]);assert.ok(out[4]>out[0]&&out[5]>out[1]&&out[6]>out[2]);});

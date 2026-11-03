@@ -1,0 +1,15 @@
+{
+  "status": "PASS",
+  "rom_sha256": "e86b777c6073a73c123967a0406f65ca083af9bde4e1c92581578f91dcee1e4d",
+  "renderer": "0xD426 / 0xD37E",
+  "terrain_table": "0xCF52E",
+  "castle_table": "0xCF5DC",
+  "graphics_pointer": "0xE614E",
+  "graphics_uncompressed_bytes": 11264,
+  "graphics_equal_native_vram": true,
+  "redraw_logical_cells": 210,
+  "independently_recomputed_attribute_words": 844,
+  "attribute_mismatches": 0,
+  "palette_check": "spring source 0x8A5C0 matches native CRAM bank1 entries0..14; index15 differs in fixture, writer/cause not verified; static preview retains source value",
+  "limits": "One supplied walking-map fixture; static browser palette, no live faction status/sprites/animation. Other seasons decoded, not runtime-verified."
+}

@@ -1,0 +1,2 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {itemCategory} from '../src/rom/item-categories.js';
+test('七类宝物按游戏原类别中文显示；书籍依据原+13区分，不依据预览图标',()=>{assert.deepEqual([0,1,2,3,4].map(i=>itemCategory(i<<5,0).label),['茶器','美术品','财宝','武器','南蛮舶来品']);assert.equal(itemCategory(0xa0,9).label,'日文书籍');assert.equal(itemCategory(0xa0,10).label,'汉文书籍');assert.notEqual(itemCategory(0xa0,9).key,itemCategory(0xa0,10).key);assert.equal(itemCategory(0x7f,0).label,'武器');assert.equal(itemCategory(0xe0,0).label,'未确认分类');});

@@ -14,3 +14,6 @@ roms/
 *.rom
 *.zip
 *.7z
+
+# Local diagnostics, screenshots, and generated ROM experiments
+build/

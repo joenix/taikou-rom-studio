@@ -1,0 +1,12 @@
+{
+  "status": "PASS",
+  "rom_sha256": "fa50df1e48bfaf38b69c1594009abad3cbc92e4227bc4489ec7b7779e3461589",
+  "renderer_reads": [
+    {
+      "icon": 1,
+      "id": 51
+    }
+  ],
+  "fixture_unchanged": true,
+  "scope": "actual held-item list reopened, item51 details renderer reads icon1 override; no original category/effect byte changed"
+}

@@ -1,0 +1,10 @@
+{
+  "selector_from_rom": 0,
+  "prior_vram_match": -1,
+  "rendered_vram_match": 21376,
+  "matching_palette_banks": [
+    0
+  ],
+  "rom_sha256": "e86b777c6073a73c123967a0406f65ca083af9bde4e1c92581578f91dcee1e4d",
+  "scope": "actual 37D50 renderer with ROM selector; isolated call using supplied status fixture, not full reopen/new game"
+}
