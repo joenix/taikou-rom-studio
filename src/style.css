@@ -132,3 +132,80 @@ th{font-size:11px;color:#738095}td{font-size:12px;color:#657389}.row-id{font-siz
  .place-side-heading{gap:8px;min-height:54px;padding:4px 8px}.place-side-heading strong{flex:1;font-size:12px}
  .has-place-panel:not(.mobile-details-expanded) .place-side-body,.has-place-panel:not(.mobile-details-expanded) .place-side-actions{display:none}
 }
+
+/* Phone browsing: keep all modules reachable and details one tap away. */
+.mobile-filter-toggle{display:none}
+.mobile-viewer .top-actions .edit-key,.mobile-viewer .top-actions .icon-button,.mobile-viewer .top-actions .toolbar-divider,.mobile-viewer .top-actions .button.primary{display:none}
+.mobile-record-detail .inspector{border:0;padding:0;overflow:visible;max-height:none}
+.mobile-record-detail .inspector-body{padding:0}
+.mobile-record-detail .modal-window-body{overscroll-behavior:contain}
+@media(max-width:900px){
+ body{min-width:320px}
+ .app{min-height:100dvh}
+ .sidebar,.map-active .sidebar{width:100%;padding:5px 8px;overflow:visible;display:grid;grid-template-columns:minmax(0,4fr) minmax(0,1.25fr);gap:3px;background:#fff;flex-shrink:0}
+ .sidebar nav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:2px;min-width:0;flex-shrink:1}
+ .sidebar .nav-item{width:100%;min-width:0;min-height:48px;padding:5px 2px;gap:4px;flex-direction:column;justify-content:center;text-align:center;font-size:11px;white-space:nowrap;border-radius:5px;margin:0}
+ .sidebar .nav-item small{display:none}
+ .sidebar .nav-item.selected{box-shadow:inset 0 -2px var(--wine)}
+ .sidebar .nav-item svg{width:17px;height:17px;flex-shrink:0}
+ .topbar,.map-active .topbar{height:auto;min-height:0;padding:8px 10px;gap:6px;flex-wrap:wrap}
+ .top-actions,.map-active .top-actions{width:100%;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+ .top-actions .button{min-height:36px}
+ .brand strong,.map-active .brand strong{font-size:13px}
+ .filebar{padding:0 10px;gap:6px}
+ .filebar>div{width:100%;gap:5px}
+ .filename{max-width:none;flex:1;min-width:0}
+ .filters{gap:8px;align-items:center}
+ .search{min-width:0;flex:1;flex-basis:0;height:40px}
+ .mobile-filter-toggle{display:inline-flex;min-height:40px}
+ .filter-controls{display:none;width:100%;gap:8px;padding:10px;background:#fff;border:1px solid var(--border);border-radius:6px}
+ .filter-controls.filters-open{display:flex}
+ .filter-controls select{min-height:38px;max-width:100%;flex:1;min-width:100px;font-size:12px}
+ .filter-controls .birth-range{max-width:none;width:100%}
+ .filter-controls .icon-button{min-width:38px;min-height:38px}
+ .table-scroll table,.faction-workspace .table-scroll table{min-width:0;width:100%;table-layout:fixed}
+ th,td,.faction-workspace th,.faction-workspace td{padding:0 8px;font-size:12px;height:44px;max-width:none}
+ th:first-child,td:first-child,.faction-workspace th:first-child,.faction-workspace td:first-child{width:48px;padding-left:9px;font-size:10px}
+ .row-name,.faction-workspace .row-name{font-size:13px;white-space:normal;overflow-wrap:anywhere;text-align:left;line-height:1.5;min-height:44px;width:100%}
+ .workspace[data-kind="people"] table th:nth-child(3),.workspace[data-kind="people"] table td:nth-child(3),
+ .workspace[data-kind="people"] table th:nth-child(4),.workspace[data-kind="people"] table td:nth-child(4),
+ .workspace[data-kind="people"] table th:nth-child(5),.workspace[data-kind="people"] table td:nth-child(5){display:none}
+ .workspace[data-kind="people"] table th:last-child{width:76px}
+ .table-scroll{max-height:calc(100dvh - 310px);min-height:150px;overscroll-behavior:contain}
+ .table-footer .icon-button{min-width:40px;min-height:40px}
+ .table-note{padding:8px 10px;font-size:10px}
+ .faction-workspace th:nth-child(3),.faction-workspace th:nth-child(4){width:70px}
+ .mobile-record-detail{max-height:calc(100dvh - 20px);width:calc(100vw - 20px)}
+ .mobile-record-detail .modal-window-top{padding:10px 12px}
+ .mobile-record-detail .modal-window-top h2{font-size:16px}
+ .mobile-record-detail .modal-window-top .icon-button{min-width:44px;min-height:44px}
+ .mobile-record-detail .modal-window-body{max-height:calc(100dvh - 100px);padding:16px}
+ .mobile-record-detail .linked-list button,.mobile-record-detail .neighbor-list button,.mobile-record-detail .faction-relations>button{min-height:44px}
+ .statusbar{padding:8px 10px;min-height:28px}
+ .statusbar>span:first-child{display:none}
+ .welcome{padding:32px 8px}
+ .welcome h1{font-size:22px;line-height:1.5}
+ .toast{white-space:normal;pointer-events:none;width:max-content;max-width:calc(100vw - 28px)}
+ .map-active .castle-view-switch{margin-bottom:6px}
+ .map-active .castle-atlas-main>.caption{display:none}
+ .map-active .castle-atlas-main.has-place-panel{grid-template-rows:auto minmax(60px,1fr) 0 56px}
+ .map-active .castle-atlas-main.has-place-panel.mobile-details-expanded{grid-template-rows:auto minmax(60px,1fr) 0 minmax(0,55%)}
+}
+@media(max-width:600px){.map-active .castle-atlas-toolbar strong{font-size:13px}.map-active .castle-atlas-toolbar span{margin-left:5px;font-size:10px}}
+@media(max-width:900px) and (max-height:500px){
+ .brand small,.filebar,.statusbar{display:none}
+ .topbar,.map-active .topbar{flex-wrap:nowrap;padding:4px 10px}
+ .top-actions,.map-active .top-actions{width:auto}
+ .seal{height:38px}
+ .sidebar .nav-item{min-height:38px;flex-direction:row;font-size:11px}
+ .map-active .castle-atlas-toolbar{gap:4px}.map-active .castle-atlas-toolbar .zoom-control{width:164px}
+}
+
+@media(max-width:900px){.workspace[data-kind="items"] th:nth-child(4),.workspace[data-kind="items"] td:nth-child(4),.workspace[data-kind="items"] th:nth-child(6),.workspace[data-kind="items"] td:nth-child(6){display:none}.workspace[data-kind="items"] th:nth-child(3){width:76px}.workspace[data-kind="items"] th:nth-child(5){width:60px}.workspace[data-kind="castles"] th:nth-child(4),.workspace[data-kind="castles"] td:nth-child(4){display:none}.workspace[data-kind="castles"] th:nth-child(3){width:86px}}
+@media(pointer:coarse){button,a,canvas{-webkit-tap-highlight-color:transparent}}
+@media(max-width:900px) and (max-height:500px){
+ .map-active .castle-atlas-main.has-place-panel.mobile-details-expanded{grid-template-rows:auto minmax(60px,1fr) 0 56px}
+ .mobile-details-expanded .place-side-panel{position:fixed;top:56px;bottom:10px;right:10px;width:min(420px,75vw);z-index:20;box-shadow:0 8px 40px #0003}
+}
+.place-side-panel{scroll-padding-top:64px}
+.town-interior canvas{scroll-margin-top:64px}

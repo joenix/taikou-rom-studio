@@ -45,7 +45,7 @@ export default function CastleAtlas({doc,revision,castles,selectedId,onSelect,re
   view.scrollTo({left:Math.max(0,place.x*zoom-view.clientWidth/2),top:Math.max(0,place.y*zoom-view.clientHeight/2),behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
   const row=list.current?.querySelector(`[data-place-key="${selectedKey}"]`);
   if(row){const panel=list.current;if(row.offsetTop<panel.scrollTop||row.offsetTop+row.offsetHeight>panel.scrollTop+panel.clientHeight)panel.scrollTop=Math.max(0,row.offsetTop-panel.clientHeight/2);}
- },[place,selectedKey,zoom,query,focusRequest]);
+ },[place,selectedKey,zoom,query,focusRequest,detailsExpanded]);
  function pickMove(e){if(!moveDraft||mode!=='edit')return;const r=e.currentTarget.getBoundingClientRect(),x=Math.floor((e.clientX-r.left)/zoom),y=Math.floor((e.clientY-r.top)/zoom);try{const draft={x,y,fillCode:moveDraft.fillCode};makePlacePatches(rom,place.kind,place.id,draft);setMoveDraft(d=>({...d,x,y}));setMoveError('');}catch(error){setMoveError(error.message);}}
  function applyMove(){try{doc.applyMap(place.kind,place.id,{x:moveDraft.x,y:moveDraft.y,fillCode:moveDraft.fillCode},moveDraft.revision);setMoveDraft(null);onChange();setFocusRequest(n=>n+1);}catch(error){setMoveError(error.message);}}
  if(!map)return <div className="inline-note">这份 ROM 的地图布局未通过校验：{capability.error?.message}。仍可切换列表查看城池。</div>;
