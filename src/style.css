@@ -217,3 +217,5 @@ th{font-size:11px;color:#738095}td{font-size:12px;color:#657389}.row-id{font-siz
 .qq-group svg{flex-shrink:0;color:#74849b}.qq-group:hover,.qq-group:focus-visible{color:var(--wine)}.qq-group:hover svg{color:var(--wine)}
 @media(max-width:900px){.brand-subline{gap:8px;margin-top:2px}.qq-group{font-size:9px;min-height:26px}.qq-group svg{width:14px;height:14px}}
 @media(max-width:900px) and (max-height:500px){.brand-subline small{display:none}.brand-subline{margin:0}.qq-group{min-height:20px}}
+.qq-group img{width:20px;height:22px;object-fit:contain;flex-shrink:0}
+@media(max-width:900px){.qq-group img{width:18px;height:20px}}
