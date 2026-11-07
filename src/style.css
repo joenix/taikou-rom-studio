@@ -90,3 +90,45 @@ th{font-size:11px;color:#738095}td{font-size:12px;color:#657389}.row-id{font-siz
  .map-active .castle-atlas-rows .atlas-entry{gap:4px;font-size:11px}
  .map-active .castle-atlas-rows .atlas-entry>span{min-width:0;overflow-wrap:anywhere}
 }
+
+.birth-range{display:flex;flex-direction:column;gap:2px;width:190px;flex-shrink:0;font-size:12px;color:var(--muted)}
+.birth-range strong{color:var(--ink);font-variant-numeric:tabular-nums;margin-left:8px}
+.birth-range-track{position:relative;height:24px;background:linear-gradient(var(--wine),var(--wine)) center/100% 3px no-repeat}
+.birth-range-track input[type=range]{position:absolute;inset:0;margin:0;width:100%;height:24px;appearance:none;background:transparent;pointer-events:none;accent-color:var(--wine)}
+.birth-range-track input[type=range]::-webkit-slider-thumb{appearance:none;width:15px;height:15px;border:2px solid white;border-radius:50%;background:var(--wine);box-shadow:0 0 0 1px var(--wine);pointer-events:auto;cursor:ew-resize}
+.birth-range-track input[type=range]::-moz-range-thumb{width:12px;height:12px;border:2px solid white;border-radius:50%;background:var(--wine);pointer-events:auto;cursor:ew-resize}
+.birth-range-track input:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
+.castle-pin-label{transform:translateX(-50%);white-space:nowrap}
+.embedded-record-editor .dialog-top{display:none}
+.embedded-record-editor .dialog-body{max-height:none;overflow:visible}
+.embedded-record-editor .dialog-intro{margin:0;padding:12px 20px}
+.map-active .castle-atlas-main.has-place-panel{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,330px);grid-template-rows:auto minmax(0,1fr) auto;gap:10px}
+.has-place-panel>.castle-atlas-toolbar{grid-column:1;grid-row:1;flex-wrap:wrap}
+.has-place-panel>.castle-atlas-viewport{grid-column:1;grid-row:2}
+.has-place-panel>.caption{grid-column:1;grid-row:3}
+.place-side-panel{grid-column:2;grid-row:1/4;min-height:0;overflow:auto;background:#fff;border:1px solid var(--border);border-radius:8px;overscroll-behavior:contain}
+.place-side-heading{display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:#fff;z-index:2;padding:10px 12px;border-bottom:1px solid var(--border)}
+.place-side-actions{display:flex;flex-wrap:wrap;gap:6px;padding:10px 12px}.place-side-body{padding:12px}.place-side-panel .inline-note{margin:8px 12px}.place-side-panel .embedded-record-editor .dialog-body{padding:10px 0}.place-side-panel .dialog-footer{flex-wrap:wrap;gap:8px}
+.placing-location{cursor:crosshair}.move-preview{position:absolute;pointer-events:none;border:2px dashed #8b3450;background:#fff8;z-index:4}
+.town-interior{margin-top:16px}.town-interior canvas{display:block;width:100%;image-rendering:pixelated;border:1px solid var(--border)}
+@media(max-width:1000px){.map-active .castle-atlas-main.has-place-panel{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(80px,1fr) auto minmax(0,42%)}.place-side-panel{grid-column:1;grid-row:4}.place-side-panel .icon-button,.place-detail-eye{min-width:36px;min-height:36px}.birth-range{width:100%;max-width:240px}.birth-range-track{height:32px}.birth-range-track input[type=range]{height:32px}.birth-range-track input[type=range]::-webkit-slider-thumb{width:22px;height:22px}}
+.atlas-directory-toggle{display:none}
+@media(max-width:600px){
+ .map-active .castle-atlas{position:relative;grid-template-columns:minmax(0,1fr)}
+ .map-active .castle-atlas-list{display:none}
+ .map-active .directory-open .castle-atlas-list{display:flex;position:absolute;left:0;top:0;bottom:0;width:190px;z-index:8;box-shadow:4px 0 14px #0002}
+ .atlas-directory-toggle{display:inline-flex;min-height:36px}
+ .map-active .castle-atlas-toolbar>div:first-of-type{width:auto;flex:1}
+ .map-active .castle-atlas-toolbar .button{min-height:36px}
+ .place-side-panel .icon-button,.place-detail-eye{min-width:44px;min-height:44px}
+ .place-hit{min-width:22px;min-height:22px}
+ .zoom-stops button{min-height:30px}
+}
+.mobile-detail-toggle{display:none}
+@media(max-width:1000px){
+ .map-active .castle-atlas-main.has-place-panel{grid-template-rows:auto minmax(80px,1fr) auto 56px}
+ .map-active .castle-atlas-main.has-place-panel.mobile-details-expanded{grid-template-rows:auto minmax(80px,1fr) auto minmax(0,42%)}
+ .mobile-detail-toggle{display:inline-flex;min-height:36px}
+ .place-side-heading{gap:8px;min-height:54px;padding:4px 8px}.place-side-heading strong{flex:1;font-size:12px}
+ .has-place-panel:not(.mobile-details-expanded) .place-side-body,.has-place-panel:not(.mobile-details-expanded) .place-side-actions{display:none}
+}

@@ -1,3 +1,4 @@
+import {readAppearance,verifyAppearance} from './appearance.js';
 import {itemCategory} from './item-categories.js';
 import {readCastleState,readFactionState,CASTLE_FIELDS,castleFieldBytes,CASTLE_STATE} from './domain-data.js';
 import {itemIconSelector,setItemIcon} from './item-icons.js';
@@ -14,11 +15,11 @@ export class RomDocument {
  #requireWrite(){if(!this.#writeGuard())fail("READ_ONLY_MODE","当前设备或模式仅支持查看");}
  constructor(bytes,filename,sha256){
   this.validation=validateRom(bytes);const ext=readMapExtension(bytes);if(ext){verifyTownEngine(bytes,ext);requireWorldMap(bytes);}this.#original=new Uint8Array(bytes);this.#bytes=new Uint8Array(bytes);
-  this.filename=filename;this.sha256=sha256;this.revision=0;
+  this.appearance=readAppearance(bytes);this.filename=filename;this.sha256=sha256;this.revision=0;
  }
  static async load(buffer,filename='game.bin'){
   const bytes=buffer instanceof Uint8Array?buffer:new Uint8Array(buffer);
-  validateRom(bytes);
+  validateRom(bytes);await verifyAppearance(bytes);
   const digest=await crypto.subtle.digest('SHA-256',bytes);
   return new RomDocument(bytes,filename,Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,'0')).join(''));
  }
@@ -52,7 +53,7 @@ export class RomDocument {
  readPerson(id){
   integer(id,0,712,'武将 ID');const b=this.#bytes,p=PROFILE.people.base+id*60,n=PROFILE.names.base+id*16;
   const family=decodeText(b,n+2,6),given=decodeText(b,n+8,8);
-  return {id,family,given,name:family+' '+given,offset:p,nameOffset:n,
+  return {id,family,given,name:family+' '+given,offset:p,nameOffset:n,birthYear:this.appearance?.records[id]?.birthYear??null,
    attrs:Array.from(span(b,p+0x27,6)),skills:SKILLS.map((_,i)=>(b[p+0x2d+Math.floor(i/4)]>>>(6-2*(i%4)))&3),
    factionId:b[p+0x1a],castleId:b[p+0x1b],rank:b[p+0x1c],rankName:RANKS[b[p+0x1c]],
    strategyLevel:b[p+0x22],tacticsLevel:b[p+0x26],strategyXp:u16(b,p+0x20),tacticsXp:u16(b,p+0x24),affinity:b[p+0x3b]&15,

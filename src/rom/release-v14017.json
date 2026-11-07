@@ -1,0 +1,90 @@
+{
+  "version": "1.40.17",
+  "title": "TAIKOU PRO V1.40.17 BOAT",
+  "signatures": [
+    {
+      "offset": 61082,
+      "hex": "4ef90015b9c0"
+    },
+    {
+      "offset": 50146,
+      "hex": "4eb90015b97e4e714e71"
+    },
+    {
+      "offset": 67548,
+      "hex": "4eb90015b9884e714e71"
+    },
+    {
+      "offset": 65814,
+      "hex": "4eb90015b9a64e71"
+    },
+    {
+      "offset": 65978,
+      "hex": "4eb90015b9a64e71"
+    },
+    {
+      "offset": 66412,
+      "hex": "4eb90015b9a64e71"
+    },
+    {
+      "offset": 66584,
+      "hex": "4eb90015b9a64e71"
+    },
+    {
+      "offset": 65838,
+      "hex": "4eb90015b9b0"
+    },
+    {
+      "offset": 65922,
+      "hex": "4eb90015b9b0"
+    },
+    {
+      "offset": 66002,
+      "hex": "4eb90015b9b0"
+    },
+    {
+      "offset": 66038,
+      "hex": "4eb90015b9b0"
+    },
+    {
+      "offset": 66386,
+      "hex": "4eb90015b9b8"
+    },
+    {
+      "offset": 66556,
+      "hex": "4eb90015b9b8"
+    },
+    {
+      "offset": 62476,
+      "hex": "4eb90015ba54"
+    },
+    {
+      "offset": 62612,
+      "hex": "4eb90015ba54"
+    },
+    {
+      "offset": 62646,
+      "hex": "4eb90015ba54"
+    },
+    {
+      "offset": 65626,
+      "hex": "4eb90015ba7e"
+    },
+    {
+      "offset": 64588,
+      "hex": "4ef90015ba9a4e71"
+    },
+    {
+      "offset": 52600,
+      "hex": "4ef90015bac04e71"
+    },
+    {
+      "offset": 52764,
+      "hex": "4eb90015bb02"
+    },
+    {
+      "offset": 1423498,
+      "hex": "48e7708002810000ffff4a3900ff0009673a0c80000003d864320c410040642c"
+    }
+  ]
+}
