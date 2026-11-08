@@ -1,0 +1,20 @@
+{
+  "claims": [
+    "original terrain locked by default; desktop edit toggle enables terrain edits",
+    "place roofs and entrances remain protected",
+    "selection restore restores imported terrain only and is undoable",
+    "imported baseline persists across refresh; unlock resets",
+    "mobile has no editing/unlock controls"
+  ],
+  "browser_checks": [
+    "desktop load27/unlock/map/original toggle/brush/select/restore/undo",
+    "refresh restores baseline and locks; unlock again/restore original edit",
+    "mobile390 width and no original toggle or painting tools"
+  ],
+  "off_happy_path": [
+    "original write without toggle rejected atomically",
+    "stroke touching castle roof rejected atomically",
+    "restore selection over4096 rejected atomically"
+  ],
+  "evidence": "unit tests + browser normal input screenshots + native exported-ROM probes"
+}

@@ -1,3 +1,4 @@
+import {isWestRom,worldLayoutSpec} from './west-layout.js';
 import {u16,fail} from './codec.js';
 import {readMapExtension} from './map-extension.js';
 import {itemIconTable} from './item-icons.js';
@@ -6,7 +7,7 @@ const long=(b,p)=>u16(b,p)*65536+u16(b,p+2);
 /** Read embedded design dates, not historical certainty or active runtime scheduling. */
 export function readAppearance(bytes){
  const map=readMapExtension(bytes),icon=itemIconTable(bytes);
- const ends=[bytes.length,map?.originalLength,icon===null?null:icon-16].filter(Number.isInteger);
+ const ends=[bytes.length,isWestRom(bytes)?worldLayoutSpec(bytes).baseLength:null,map?.originalLength,icon===null?null:icon-16].filter(Number.isInteger);
  for(const end of new Set(ends)){
   const footer=end-48;
   if(footer<0||text.decode(bytes.subarray(footer,footer+8))!=='TKAMEND1')continue;

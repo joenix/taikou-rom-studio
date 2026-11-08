@@ -1,0 +1,23 @@
+{
+  "status": "LOCAL_V14027_PASS_NOT_DEPLOYED",
+  "tests_pass": 57,
+  "tests_skipped": 0,
+  "build": "PASS",
+  "manifest": "../taikou-rom-studio/src/rom/layouts/japan-v14027.json",
+  "export_bytes": 2095694,
+  "export_sha256": "794c5479fb60c6d1d7d8291d179dbff610d16c86d1b1090553f56bc3e693ff81",
+  "native_export_checks": {
+    "routes-native": {
+      "status": "PASS_NATIVE_BYTE_DISTANCE_ROUTE_CASES",
+      "rom_sha256": "794c5479fb60c6d1d7d8291d179dbff610d16c86d1b1090553f56bc3e693ff81"
+    },
+    "ocean-live-native": {
+      "status": "PASS_FOCUSED_WEST_DRAFT_TRAVEL",
+      "rom_sha256": "794c5479fb60c6d1d7d8291d179dbff610d16c86d1b1090553f56bc3e693ff81"
+    },
+    "20-town-live-native": {
+      "status": "PASS_NEW_TOWN_NAME_ENTER_WALK_EXIT",
+      "rom_sha256": "794c5479fb60c6d1d7d8291d179dbff610d16c86d1b1090553f56bc3e693ff81"
+    }
+  }
+}

@@ -1,3 +1,5 @@
+import {isWestRom,readWestLayout} from './west-layout.js';
+import {westCoordinate,readWestMap,readWestPlaces,westTerrainPatches} from './west-map.js';
 import {verifyTownEngine} from './town-engine.js';
 import {readMapExtension} from './map-extension.js';
 import {span,u16,decodeText,encodeField,integer,fail} from './codec.js';
@@ -5,6 +7,7 @@ import {PROFILE,hex} from './profile.js';
 export const WORLD=Object.freeze({columns:41,rows:24,blockSize:8,width:328,height:192,indexBase:0x764a8,dataBase:0xc0826,blocks:521,townPointers:0x75d36,townBases:0x761c6,townEntrances:0xd30da,overviewBase:0xbfcdc});
 const SIGNATURES=[{offset:0x17c22,hex:'23fc000c082600ffb460'},{offset:0xc0aa,hex:'207c000764a8'},{offset:0xf9a6,hex:'227c000d30da'},{offset:0xc284,hex:'d7c00c44007b6daa'},{offset:0x7484,hex:'207c000761c6'}];
 export function mapCoordinate(bytes,x,y){
+ if(isWestRom(bytes))return westCoordinate(bytes,x,y);
  integer(x,0,WORLD.width-1,'地图 X');integer(y,0,WORLD.height-1,'地图 Y');
  const mapId=Math.floor(y/8)*41+Math.floor(x/8),block=u16(bytes,WORLD.indexBase+mapId*2);
  if(!block||block>WORLD.blocks)fail('EMPTY_MAP_SECTOR','此位置没有已分配的大地图分区',{x,y,mapId});
@@ -19,6 +22,7 @@ function townName(bytes,id){
  return {name:decodeText(bytes,offset,length),nameOffset:offset,nameCapacity:id===17?24:length};
 }
 export function readMapPlaces(bytes){
+ if(isWestRom(bytes))return readWestPlaces(bytes);
  const ext=readMapExtension(bytes);
  const castles=Array.from({length:123},(_,id)=>{
   const offset=PROFILE.castles.base+id*20,mapId=u16(bytes,offset+14),x=bytes[offset+16],y=bytes[offset+17];
@@ -35,6 +39,7 @@ export function readMapPlaces(bytes){
 }
 export function inspectWorldMap(bytes){
  try{
+  if(isWestRom(bytes)){const map=readWestMap(bytes);return {supported:true,layout:map.layout,width:map.width,height:map.height,blocks:map.blocks,castles:map.places.castles.length,towns:map.places.towns.length};}
   const ext=readMapExtension(bytes);if(ext)verifyTownEngine(bytes,ext);
   for(const s of SIGNATURES){if(ext&&[0xf9a6,0x7484].includes(s.offset))continue;const actual=Array.from(span(bytes,s.offset,s.hex.length/2),b=>b.toString(16).padStart(2,'0')).join('');if(actual!==s.hex)fail('UNSUPPORTED_MAP_LAYOUT','大地图读取或入口代码不匹配',{offset:s.offset});}
   span(bytes,WORLD.dataBase,WORLD.blocks*64);
@@ -55,6 +60,7 @@ export function inspectWorldMap(bytes){
 }
 export function requireWorldMap(bytes){const result=inspectWorldMap(bytes);if(!result.supported)fail(result.error.code,result.error.message,result.error.details);return result;}
 export function readWorldMap(bytes){
+ if(isWestRom(bytes))return readWestMap(bytes);
  requireWorldMap(bytes);const cells=new Int16Array(WORLD.width*WORLD.height).fill(-1),counts=new Map();
  for(let y=0;y<WORLD.height;y++)for(let x=0;x<WORLD.width;x++){
   const id=Math.floor(y/8)*41+Math.floor(x/8),block=u16(bytes,WORLD.indexBase+id*2);if(!block)continue;
@@ -70,6 +76,7 @@ export function terrainColor(code){
  const h=(code*31+65)%130,s=20+(code%4)*5,l=48+(code%5)*7;return `hsl(${h} ${s}% ${l}%)`;
 }
 export function makeTerrainPatches(bytes,draft){
+ if(isWestRom(bytes))return westTerrainPatches(bytes,draft);
  requireWorldMap(bytes);for(const key of Object.keys(draft))if(!['x0','y0','x1','y1','code'].includes(key))fail('UNSUPPORTED_FIELD',`未开放地形字段 ${key}`);const {x0,y0,x1=x0,y1=y0,code}=draft;integer(code,0,63,'地形原码');
  for(const [v,label,max] of [[x0,'起点 X',327],[x1,'终点 X',327],[y0,'起点 Y',191],[y1,'终点 Y',191]])integer(v,0,max,label);
  const left=Math.min(x0,x1),right=Math.max(x0,x1),top=Math.min(y0,y1),bottom=Math.max(y0,y1);
@@ -83,6 +90,7 @@ export function makeTerrainPatches(bytes,draft){
  return {patches,label:`地形选区 (${left},${top})–(${right},${bottom}) → ${hex(code,2)}`,selection:{x0:left,y0:top,x1:right,y1:bottom}};
 }
 export function makePlacePatches(bytes,kind,id,draft){
+ if(isWestRom(bytes))fail('PLACE_MOVE_NOT_OPEN','当前扩展地图先支持图块编辑；地点移位暂未开放');
  requireWorldMap(bytes);const places=readMapPlaces(bytes),place=(kind==='map-castle'?places.castles:kind==='map-town'?places.towns:[]).find(p=>p.id===id);
  if(!place)fail('INVALID_MAP_PLACE','地点不存在');if(place.active===false)fail('INACTIVE_TOWN','请先恢复停用的町，再编辑位置或名称');
  const allowed=kind==='map-castle'?['name','x','y','fillCode','overviewX','overviewY']:['name','x','y','fillCode'];

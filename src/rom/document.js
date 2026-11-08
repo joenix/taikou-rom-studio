@@ -1,3 +1,5 @@
+import {isWestRom,worldLayoutSpec} from './west-layout.js';
+import {rebuildWestNavigation,worldNavigationDirty} from './west-navigation.js';
 import {readAppearance,verifyAppearance} from './appearance.js';
 import {itemCategory} from './item-categories.js';
 import {readCastleState,readFactionState,CASTLE_FIELDS,castleFieldBytes,CASTLE_STATE} from './domain-data.js';
@@ -5,29 +7,31 @@ import {itemIconSelector,setItemIcon} from './item-icons.js';
 import {validatePortraitSelector,portraitImage} from './portraits.js';
 import {townEngineCapability,createIndependentTown,setTownActive,verifyTownEngine} from './town-engine.js';
 import {readMapExtension} from './map-extension.js';
-import {inspectWorldMap,readWorldMap,requireWorldMap,makeTerrainPatches,makePlacePatches} from './world-map.js';
+import {inspectWorldMap,readWorldMap,requireWorldMap,makeTerrainPatches,makePlacePatches,mapCoordinate} from './world-map.js';
 import {PROFILE,STATS,SKILLS,RANKS,hex} from './profile.js';
 import {validateRom} from './validate.js';
 import {span,u16,decodeText,encodeField,integer,fail,checksum} from './codec.js';
 export class RomDocument {
- #original;#bytes;#undo=[];#redo=[];#writeGuard=()=>true;
+ #original;#bytes;#imported;#undo=[];#redo=[];#writeGuard=()=>true;
  setWriteGuard(guard){this.#writeGuard=guard;}
  #requireWrite(){if(!this.#writeGuard())fail("READ_ONLY_MODE","当前设备或模式仅支持查看");}
- constructor(bytes,filename,sha256){
-  this.validation=validateRom(bytes);const ext=readMapExtension(bytes);if(ext){verifyTownEngine(bytes,ext);requireWorldMap(bytes);}this.#original=new Uint8Array(bytes);this.#bytes=new Uint8Array(bytes);
+ constructor(bytes,filename,sha256,importedBytes=bytes){
+  this.validation=validateRom(bytes);const ext=readMapExtension(bytes);if(ext){verifyTownEngine(bytes,ext);requireWorldMap(bytes);}this.#imported=new Uint8Array(importedBytes);this.#original=new Uint8Array(bytes);this.#bytes=new Uint8Array(bytes);
   this.appearance=readAppearance(bytes);this.filename=filename;this.sha256=sha256;this.revision=0;
  }
- static async load(buffer,filename='game.bin'){
+ static async load(buffer,filename='game.bin',importedBuffer=null){
   const bytes=buffer instanceof Uint8Array?buffer:new Uint8Array(buffer);
   validateRom(bytes);await verifyAppearance(bytes);
+  const imported=importedBuffer===null?bytes:new Uint8Array(importedBuffer);validateRom(imported);if(worldLayoutSpec(bytes)?.version!==worldLayoutSpec(imported)?.version)fail('INVALID_RESTORE_BASELINE','还原基准与当前地图版本不匹配');
   const digest=await crypto.subtle.digest('SHA-256',bytes);
-  return new RomDocument(bytes,filename,Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,'0')).join(''));
+  return new RomDocument(bytes,filename,Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,'0')).join(''),imported);
  }
  get byteLength(){return this.#bytes.length;}
  get canUndo(){return this.#undo.length>0;}
  get canRedo(){return this.#redo.length>0;}
  get history(){return this.#undo.map(t=>({kind:t.kind,id:t.id,label:t.label,changes:t.patches.length}));}
  get changedBytes(){let n=Math.max(0,this.#original.length-this.#bytes.length);for(let i=0;i<this.#bytes.length;i++)if(this.#bytes[i]!==this.#original[i])n++;return n;}
+ get importedBytes(){return new Uint8Array(this.#imported);}
  get originalBytes(){return new Uint8Array(this.#original);}
  get workingBytes(){return new Uint8Array(this.#bytes);}
  get mapCapability(){return inspectWorldMap(this.#bytes);}
@@ -40,7 +44,18 @@ export class RomDocument {
   validateRom(candidate,{verifyChecksum:false});requireWorldMap(candidate);const ext=readMapExtension(candidate);if(ext)verifyTownEngine(candidate,ext);
   this.#bytes=candidate;this.#undo.push({kind,id,label:result.label,patches:result.patches});this.#redo=[];this.revision++;return true;
  }
- get townCapability(){return townEngineCapability(this.#bytes);}
+ restoreMapTerrain(draft,expectedRevision=this.revision){this.#requireWrite();
+  if(expectedRevision!==this.revision)fail('STALE_DRAFT','地图已变化，请重新选择还原区域');
+  const {x0,y0,x1=x0,y1=y0}=draft;for(const v of [x0,x1,y0,y1])if(!Number.isInteger(v))fail('INVALID_FIELD','选区坐标必须是整数');
+  if((Math.abs(x1-x0)+1)*(Math.abs(y1-y0)+1)>4096)fail('MAP_SELECTION_TOO_LARGE','每次最多还原4096格');
+  const cells=[];for(let y=Math.min(y0,y1);y<=Math.max(y0,y1);y++)for(let x=Math.min(x0,x1);x<=Math.max(x0,x1);x++){
+   const base=mapCoordinate(this.#imported,x,y),current=mapCoordinate(this.#bytes,x,y),code=this.#imported[base.offset];if(code!==this.#bytes[current.offset])cells.push({x,y,code});
+  }
+  if(!cells.length)return false;
+  const changed=this.applyMap('map-terrain',0,{cells,allowOriginal:draft.allowOriginal===true},expectedRevision);
+  if(changed)this.#undo[this.#undo.length-1].label=`还原地图选区 · ${cells.length} 格`;return changed;
+ }
+ get townCapability(){return isWestRom(this.#bytes)?{supported:false,error:{message:'当前扩展版支持浏览已有町，本阶段不新增町'}}:townEngineCapability(this.#bytes);}
  get mapExtension(){return readMapExtension(this.#bytes);}
  applyTown(action,draft,expectedRevision=this.revision){this.#requireWrite();
   if(expectedRevision!==this.revision)fail('STALE_DRAFT','地图已变化，请重新打开编辑窗口');
@@ -127,14 +142,14 @@ export class RomDocument {
   if(kind==='castles'){const p=PROFILE.castles.base+id*20;const state=readCastleState(this.#bytes,id);return offset>=p&&offset<p+9||!!state&&offset>=state.offset+3&&offset<=state.offset+15;}
   return false;
  }
- undo(){this.#requireWrite();const t=this.#undo.pop();if(!t)return false;if(t.beforeLength!==undefined){const b=new Uint8Array(t.beforeLength);b.set(this.#bytes.subarray(0,b.length));this.#bytes=b;}for(const p of t.patches)if(p.offset<this.#bytes.length)this.#bytes[p.offset]=p.before;this.#redo.push(t);this.revision++;return true;}
- redo(){this.#requireWrite();const t=this.#redo.pop();if(!t)return false;if(t.afterLength!==undefined){const b=new Uint8Array(t.afterLength);b.set(this.#bytes.subarray(0,b.length));this.#bytes=b;}for(const p of t.patches)if(p.offset<this.#bytes.length)this.#bytes[p.offset]=p.after;this.#undo.push(t);this.revision++;return true;}
+ undo(){this.#requireWrite();const t=this.#undo.pop();if(!t)return false;this.#bytes=new Uint8Array(this.#bytes);if(t.beforeLength!==undefined){const b=new Uint8Array(t.beforeLength);b.set(this.#bytes.subarray(0,b.length));this.#bytes=b;}for(const p of t.patches)if(p.offset<this.#bytes.length)this.#bytes[p.offset]=p.before;this.#redo.push(t);this.revision++;return true;}
+ redo(){this.#requireWrite();const t=this.#redo.pop();if(!t)return false;this.#bytes=new Uint8Array(this.#bytes);if(t.afterLength!==undefined){const b=new Uint8Array(t.afterLength);b.set(this.#bytes.subarray(0,b.length));this.#bytes=b;}for(const p of t.patches)if(p.offset<this.#bytes.length)this.#bytes[p.offset]=p.after;this.#undo.push(t);this.revision++;return true;}
  exportBytes(){this.#requireWrite();
   validateRom(this.#bytes,{verifyChecksum:false});
   if(this.#undo.some(t=>t.kind.startsWith('map-')))requireWorldMap(this.#bytes);
   const ext=readMapExtension(this.#bytes);if(ext)verifyTownEngine(this.#bytes,ext);
   const permitted=new Set(this.#undo.flatMap(t=>t.patches.map(p=>p.offset)));
   for(let i=0;i<this.#bytes.length;i++)if(this.#bytes[i]!==this.#original[i]&&!permitted.has(i))fail('UNTRACKED_WRITE','存在不属于单条编辑事务的修改',{offset:i});
-  const bytes=new Uint8Array(this.#bytes);const sum=checksum(bytes);bytes[0x18e]=sum>>>8;bytes[0x18f]=sum&255;validateRom(bytes);return bytes;
+  const bytes=isWestRom(this.#bytes)&&worldNavigationDirty(this.#bytes)?rebuildWestNavigation(this.#bytes):new Uint8Array(this.#bytes);const sum=checksum(bytes);bytes[0x18e]=sum>>>8;bytes[0x18f]=sum&255;validateRom(bytes);return bytes;
  }
 }

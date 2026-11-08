@@ -1,0 +1,19 @@
+{
+  "claims": [
+    "v26 import and actual1224-sector map across negativeY",
+    "region buttons west/shikoku/tohoku/kyushu/original",
+    "desktop password editing, mobile readonly",
+    "new positive-frame and negative coordinates paint; source regions/place footprints protected",
+    "undo/redo and original save fixture untouched",
+    "v26 export native route banks below2MiB, reload and reuse",
+    "29 town interiors and26 gate names browse",
+    "people/items edits and appearance metadata remain usable"
+  ],
+  "checks": [
+    "normal mouse stroke/undo/redo/export/reload/refresh",
+    "desktop1600x1000 and mobile390x844 no page overflow",
+    "three region navigation and town-eye interior detail",
+    "negative: original map paint rejected, corrupt bank pointer rejected",
+    "native exported-ROM route, ocean and town traversal"
+  ]
+}

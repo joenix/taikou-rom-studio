@@ -1,0 +1,50 @@
+{
+  "id": "editor.world.original_unlock_and_restore",
+  "status": "LOCAL_SCOPED_PASS_NOT_DEPLOYED",
+  "version": "1.40.27",
+  "source_rom_sha256": "342f2dc8809b0bcaae32b13f9dc48428700de4ca81bcfdcd12e4e5e57cffece0",
+  "tests_pass": 61,
+  "tests_failed": 0,
+  "tests_skipped": 0,
+  "build": "PASS",
+  "browser": {
+    "default_original_lock": true,
+    "locked_stroke_rejected": true,
+    "desktop_original_paint": true,
+    "selection_restore_and_undo_redo": true,
+    "refresh_keeps_imported_baseline": true,
+    "refresh_relocks": true,
+    "restored_export_exact_import_match": true,
+    "mobile_edit_controls": 0,
+    "mobile_page_and_viewport_width": [
+      390,
+      390
+    ],
+    "screenshots": [
+      "local-artifacts/original-terrain/desktop.png",
+      "local-artifacts/original-terrain/mobile.png"
+    ]
+  },
+  "native_edited_original_export": {
+    "ocean-live-native": {
+      "status": "PASS_FOCUSED_WEST_DRAFT_TRAVEL",
+      "rom_sha256": "73865ca8cfcd5570612031120355d53b93c517f91d812d1ae69a49f25437e93a"
+    },
+    "routes-native": {
+      "status": "PASS_NATIVE_BYTE_DISTANCE_ROUTE_CASES",
+      "rom_sha256": "73865ca8cfcd5570612031120355d53b93c517f91d812d1ae69a49f25437e93a"
+    },
+    "20-town-live-native": {
+      "status": "PASS_NEW_TOWN_NAME_ENTER_WALK_EXIT",
+      "rom_sha256": "73865ca8cfcd5570612031120355d53b93c517f91d812d1ae69a49f25437e93a"
+    }
+  },
+  "limits": [
+    "Selection restore only;max4096 cells;requires original unlock for changed old terrain",
+    "City/town roofs/entrances protected; unallocated sectors unavailable",
+    "Baseline is imported file, not factory ROM; a new import establishes a new baseline",
+    "Legacy browser snapshots lacking importedBytes use current recovered snapshot as baseline, with toast notice",
+    "Undo history is session-only; imported baseline and working bytes persist",
+    "No online deployment; existing ROM release unchanged"
+  ]
+}

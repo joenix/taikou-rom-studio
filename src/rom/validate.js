@@ -1,3 +1,4 @@
+import {isWestRom,readWestLayout} from './west-layout.js';
 import CURRENT_RELEASE from './release-v14017.json' with {type:'json'};
 import {itemIconTable} from './item-icons.js';
 import {PROFILE,RELEASE} from './profile.js';
@@ -6,8 +7,9 @@ export function validateRom(bytes,{verifyChecksum=true}={}){
  if(!(bytes instanceof Uint8Array)||bytes.length<0x89f9a||bytes.length>16*1024*1024||bytes.length%2)fail('INVALID_SIZE','文件大小不符合支持的 MD 太阁 ROM 布局');
  const ascii=new TextDecoder('ascii');
  if(!ascii.decode(span(bytes,0x100,16)).startsWith('SEGA'))fail('NOT_MD_ROM','不是有效的 Mega Drive ROM；不支持压缩包或带交错头的 SMD 文件',{offset:0x100});
- const title=ascii.decode(span(bytes,0x120,48)).trim(),release=[CURRENT_RELEASE,RELEASE].find(r=>r.title===title);
- if(!release||ascii.decode(span(bytes,0x150,48)).trim()!==title)fail('NOT_TAIKOU','请选择 v1.40.17 水路行船版或受支持的编辑导出文件',{offset:0x120});
+ const title=ascii.decode(span(bytes,0x120,48)).trim(),release=isWestRom(bytes)?{title,west:true}:[CURRENT_RELEASE,RELEASE].find(r=>r.title===title);
+ if(!release||ascii.decode(span(bytes,0x150,48)).trim()!==title)fail('NOT_TAIKOU','请选择受支持的太阁 PRO ROM（含 v1.40.28 海陆山林版）',{offset:0x120});
+ if(release.west)readWestLayout(bytes,{fresh:true});
  for(const s of [...RELEASE.signatures,...(release===CURRENT_RELEASE?CURRENT_RELEASE.signatures:[])]){const actual=Array.from(span(bytes,s.offset,s.hex.length/2),b=>b.toString(16).padStart(2,'0')).join('');if(actual!==s.hex)fail('UNSUPPORTED_LAYOUT','版本关键代码不匹配',{offset:s.offset});}
  for(const s of PROFILE.signatures){
   const value=Array.from(span(bytes,s.offset,s.hex.length/2),b=>b.toString(16).padStart(2,'0')).join('');

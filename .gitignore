@@ -17,3 +17,5 @@ roms/
 
 # Local diagnostics, screenshots, and generated ROM experiments
 build/
+
+local-artifacts/

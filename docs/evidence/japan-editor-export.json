@@ -1,0 +1,68 @@
+{
+  "status": "LOCAL_V14026_EDITOR_EXPORT_SCOPED_PASS_NOT_DEPLOYED",
+  "source_sha256": "574dbd850f75c7b67f27f01b90b93db6c45b4cb51d9deec99b9af0a06835bb16",
+  "export": {
+    "sha256": "e275f276f2ba942dbea08110693fb61008f54ad576499e2cc26e8444d66e138b",
+    "bytes": 2092390,
+    "world_changes": [
+      {
+        "x": 310,
+        "y": -30,
+        "before": 53,
+        "after": 19
+      }
+    ],
+    "layout": "1.40.26",
+    "terrainFingerprint": 4055360114
+  },
+  "automated_tests": {
+    "pass": 55,
+    "failed": 0,
+    "skipped": 0
+  },
+  "production_build": "PASS",
+  "browser": {
+    "desktop": [
+      1600,
+      1000
+    ],
+    "mobile": [
+      390,
+      844
+    ],
+    "runtime_errors": [],
+    "checks": [
+      "v26 import;1224 actual sectors",
+      "negativeY stroke; undo/redo and download",
+      "refresh restores applied edit and locks",
+      "region shortcuts; town detail and relocated interior schematic",
+      "mobile zero paint controls; page width390; full224x168 town schematic visible",
+      "edit mode opens town detail and returns to64-tile palette"
+    ]
+  },
+  "native": {
+    "route_calls": 66,
+    "ocean_cases": 3,
+    "town_roundtrip": "浦戸20",
+    "rom_sha256": "e275f276f2ba942dbea08110693fb61008f54ad576499e2cc26e8444d66e138b",
+    "scope": "Isolated native calls using private fixture copy. Static waypoint and ABI proof, not map trip/town/cold-start acceptance. Ocean and town use private staged endpoint fixtures, first target injected for ocean. No cold-start/all-game regression."
+  },
+  "navigation": {
+    "format": 2,
+    "fixed_cell_maps": true,
+    "reusable_slot_bytes": 114688,
+    "max_node_capacity": 2460,
+    "max_distance": 254,
+    "max_queue": 576,
+    "repeated_export": "PASS unit",
+    "mixed_person_item_export": "PASS unit",
+    "corrupt_bank_pointer_rejected": "PASS unit",
+    "fragment_capacity_overflow": "PASS rejected, undo restores base ROM",
+    "refresh_without_undo_history": "PASS browser export and native probes"
+  },
+  "screenshots": [
+    "local-artifacts/japan-editor/desktop.png",
+    "local-artifacts/japan-editor/mobile.png",
+    "local-artifacts/japan-editor/town-detail.png"
+  ]
+}

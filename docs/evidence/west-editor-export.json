@@ -1,0 +1,407 @@
+{
+  "status": "PASS_FOCUSED_EDITOR_EXPORT_NOT_FULL_GAME_REGRESSION",
+  "date": "2026-11-08",
+  "export_sha256": "a57b73832b948114dc8336201333709584aab605db93e806dcec3f7c8d10887a",
+  "export_bytes": 2065278,
+  "tests": {
+    "pass": 49,
+    "fail": 0,
+    "skip": 0
+  },
+  "production_build": "PASS",
+  "browser_checks": [
+    "native canvas visible",
+    "wrong password rejected",
+    "two-cell stroke and undo/redo",
+    "download actual ROM",
+    "rectangle fill",
+    "one-byte edit survives reload; edit access resets",
+    "mobile390x844 readonly; document width390"
+  ],
+  "native_cases": [
+    {
+      "name": "old-seam-to-tsuwano",
+      "start": [
+        0,
+        66
+      ],
+      "goal": [
+        -10,
+        82
+      ],
+      "positions": [
+        [
+          0,
+          66
+        ],
+        [
+          -1,
+          66
+        ],
+        [
+          -2,
+          66
+        ],
+        [
+          -3,
+          66
+        ],
+        [
+          -4,
+          66
+        ],
+        [
+          -5,
+          66
+        ],
+        [
+          -6,
+          66
+        ],
+        [
+          -7,
+          66
+        ],
+        [
+          -8,
+          66
+        ],
+        [
+          -9,
+          66
+        ],
+        [
+          -10,
+          66
+        ],
+        [
+          -10,
+          67
+        ],
+        [
+          -10,
+          68
+        ],
+        [
+          -10,
+          69
+        ],
+        [
+          -10,
+          70
+        ],
+        [
+          -10,
+          71
+        ],
+        [
+          -10,
+          72
+        ],
+        [
+          -9,
+          72
+        ],
+        [
+          -10,
+          72
+        ],
+        [
+          -10,
+          73
+        ],
+        [
+          -10,
+          74
+        ],
+        [
+          -10,
+          75
+        ],
+        [
+          -10,
+          76
+        ],
+        [
+          -10,
+          77
+        ],
+        [
+          -10,
+          78
+        ],
+        [
+          -10,
+          79
+        ],
+        [
+          -10,
+          80
+        ],
+        [
+          -9,
+          80
+        ],
+        [
+          -10,
+          81
+        ],
+        [
+          -10,
+          82
+        ]
+      ],
+      "frames": 816,
+      "last_graphics": {
+        "pointer": 1432984,
+        "tile": 1612,
+        "boat": false
+      },
+      "vram384_match": true,
+      "target_preserved": true,
+      "legacy_global_fallback_hits": 0,
+      "exception_hits": 0
+    },
+    {
+      "name": "tsuwano-back-to-old-seam",
+      "start": [
+        -10,
+        82
+      ],
+      "goal": [
+        0,
+        66
+      ],
+      "positions": [
+        [
+          -10,
+          82
+        ],
+        [
+          -10,
+          81
+        ],
+        [
+          -10,
+          80
+        ],
+        [
+          -10,
+          79
+        ],
+        [
+          -10,
+          78
+        ],
+        [
+          -10,
+          77
+        ],
+        [
+          -10,
+          76
+        ],
+        [
+          -10,
+          75
+        ],
+        [
+          -10,
+          74
+        ],
+        [
+          -10,
+          73
+        ],
+        [
+          -10,
+          72
+        ],
+        [
+          -10,
+          71
+        ],
+        [
+          -9,
+          71
+        ],
+        [
+          -8,
+          71
+        ],
+        [
+          -9,
+          71
+        ],
+        [
+          -10,
+          71
+        ],
+        [
+          -10,
+          70
+        ],
+        [
+          -10,
+          69
+        ],
+        [
+          -10,
+          68
+        ],
+        [
+          -10,
+          67
+        ],
+        [
+          -10,
+          66
+        ],
+        [
+          -9,
+          66
+        ],
+        [
+          -8,
+          66
+        ],
+        [
+          -7,
+          66
+        ],
+        [
+          -5,
+          66
+        ],
+        [
+          -4,
+          66
+        ],
+        [
+          -3,
+          66
+        ],
+        [
+          -2,
+          66
+        ],
+        [
+          -1,
+          66
+        ],
+        [
+          0,
+          66
+        ]
+      ],
+      "frames": 816,
+      "last_graphics": {
+        "pointer": 1433752,
+        "tile": 1636,
+        "boat": false
+      },
+      "vram384_match": true,
+      "target_preserved": true,
+      "legacy_global_fallback_hits": 0,
+      "exception_hits": 0
+    },
+    {
+      "name": "coast-board",
+      "start": [
+        -48,
+        113
+      ],
+      "goal": [
+        -48,
+        114
+      ],
+      "positions": [
+        [
+          -48,
+          113
+        ],
+        [
+          -48,
+          114
+        ]
+      ],
+      "frames": 36,
+      "last_graphics": {
+        "pointer": 1431832,
+        "tile": 1612,
+        "boat": true
+      },
+      "vram384_match": true,
+      "target_preserved": true,
+      "legacy_global_fallback_hits": 0,
+      "exception_hits": 0
+    },
+    {
+      "name": "coast-land",
+      "start": [
+        -48,
+        114
+      ],
+      "goal": [
+        -48,
+        113
+      ],
+      "positions": [
+        [
+          -48,
+          114
+        ],
+        [
+          -48,
+          113
+        ]
+      ],
+      "frames": 36,
+      "last_graphics": {
+        "pointer": 1432600,
+        "tile": 1600,
+        "boat": false
+      },
+      "vram384_match": true,
+      "target_preserved": true,
+      "legacy_global_fallback_hits": 0,
+      "exception_hits": 0
+    },
+    {
+      "name": "yamaguchi-label",
+      "start": [
+        -20,
+        98
+      ],
+      "goal": [
+        -20,
+        97
+      ],
+      "positions": [
+        [
+          -20,
+          98
+        ],
+        [
+          -20,
+          97
+        ]
+      ],
+      "frames": 24,
+      "last_graphics": {
+        "pointer": 1432600,
+        "tile": 1600,
+        "boat": false
+      },
+      "vram384_match": true,
+      "target_preserved": true,
+      "legacy_global_fallback_hits": 0,
+      "exception_hits": 0
+    }
+  ],
+  "limitations": "Fixture-copy staged endpoints, one real direction+confirm then target injected at first player step; native movement/rendering without per-step inputs. World travel and graphics checks only; new Yamaguchi town entry/move/exit is checked in a separate report. Other new sites remain reserved.",
+  "screenshots": [
+    "local-artifacts/ui-check/west-editor-desktop.png",
+    "local-artifacts/ui-check/west-editor-mobile.png"
+  ]
+}
