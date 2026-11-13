@@ -8,6 +8,7 @@ import JAPAN32 from './layouts/japan-v14032.json' with {type:'json'};
 import JAPAN33 from './layouts/japan-v14033.json' with {type:'json'};
 import {readRomDirectory} from './rom-directory.js';
 import {readRoadFlow} from './road-flow.js';
+import {worldLayoutContract} from './world-layout-contract.js';
 const L=LEGACY;
 const JAPAN142={...JAPAN33,version:'1.42',title:'TAIKOU PRO V1.42 FACTION BASE',fexObjectBytes:0xdea};
 import {span,u16,fail} from './codec.js';
@@ -47,8 +48,9 @@ export function westNavigation(bytes){
  return null;
 }
 export function readWestLayout(bytes,{fresh=false}={}){
- const L=worldLayoutSpec(bytes);if(!L)return null;if(!fresh&&cache.has(bytes))return cache.get(bytes);
- const a=L.directoryOffset,directory=readRomDirectory(bytes),glyphs=directory?.manifest.resources.place_glyphs;
+ const base=worldLayoutSpec(bytes);if(!base)return null;if(!fresh&&cache.has(bytes))return cache.get(bytes);
+ const directory=readRomDirectory(bytes),L=worldLayoutContract(bytes,base,directory);
+ const a=L.directoryOffset,glyphs=directory?.manifest.resources.place_glyphs;
  if(decoder.decode(span(bytes,a,8))!=='TKWX0001'||u16(bytes,a+8)!==1||u16(bytes,a+10)!==(L.sectorCount??585)||long(bytes,a+24)!==1230||long(bytes,a+20)!==L.codeOffset)fail('INVALID_WEST_CATALOG','西端地图资源目录不匹配');
  const entriesAt=long(bytes,a+12),rows=[],byId=new Map(),byXY=new Map();let previous=-1;
  for(let i=0;i<(L.sectorCount??585);i++){
@@ -60,6 +62,9 @@ export function readWestLayout(bytes,{fresh=false}={}){
  if(rows.filter(r=>r.id>=1230).length!==(L.newSectorCount??64))fail('INVALID_WEST_CATALOG','扩展分区数量异常');
  const nav=westNavigation(bytes),values=nav?.values??L.navigation,mutable=new Set(L.relocations.flatMap(r=>Array.from({length:r.width},(_,i)=>r.offset+i)));
  const code=Uint8Array.from(L.codeHex.match(/../g),v=>parseInt(v,16));
+ for(const p of L.operandPatches)for(let i=0;i<p.afterBytes.length;i++)if(p.offset+i>=L.codeOffset&&p.offset+i<L.codeOffset+code.length){
+  if(code[p.offset+i-L.codeOffset]!==parseInt(p.before.slice(i*2,i*2+2),16))fail('INVALID_WORLD_CONTRACT','地图代码原始操作数不匹配');mutable.add(p.offset+i);
+ }
  for(let i=0;i<code.length;i++)if(!mutable.has(L.codeOffset+i)&&bytes[L.codeOffset+i]!==code[i])fail('UNSUPPORTED_WEST_CODE','地图运行代码不匹配',{offset:L.codeOffset+i});
  for(const p of L.relocations){const value=p.width===2?u16(bytes,p.offset):long(bytes,p.offset);if(value!==values[p.field])fail('INVALID_WEST_NAV','寻路常量与目录不一致',{offset:p.offset});}
  const routeSearch=directory?.manifest.resources.route_search;
@@ -92,6 +97,9 @@ export function readWestLayout(bytes,{fresh=false}={}){
   if(visitHooks?.schema==='absolute-jump-hooks.v1')for(const [at,target,length] of visitHooks.entries){
    const hook=[0x4e,0xf9,target>>>24,target>>>16&255,target>>>8&255,target&255];while(hook.length<length)hook.push(0x4e,0x71);
    for(let i=Math.max(at,patch.offset);i<Math.min(at+length,patch.offset+expected.length);i++)expected[i-patch.offset]=hook[i-at];
+  }
+  for(const p of L.operandPatches)for(let i=Math.max(p.offset,patch.offset);i<Math.min(p.offset+p.afterBytes.length,patch.offset+expected.length);i++){
+   if(expected[i-patch.offset]!==parseInt(p.before.slice((i-p.offset)*2,(i-p.offset)*2+2),16))fail('INVALID_WORLD_CONTRACT','地图补丁原始操作数不匹配');expected[i-patch.offset]=p.afterBytes[i-p.offset];
   }
   for(let i=0;i<expected.length;i++)if(bytes[patch.offset+i]!==expected[i])fail('UNSUPPORTED_WEST_CODE','地图入口引用不匹配',{offset:patch.offset+i});
  }

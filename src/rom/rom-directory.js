@@ -1,5 +1,6 @@
 import {fail,span} from './codec.js';
 import {PROFILE} from './profile.js';
+import {factionExpansionLayout} from './fex-layout.js';
 
 const MAGIC=new TextEncoder().encode('TKROMD01'),TRAILER=32,MAX_MANIFEST=0x10000;
 const ascii=new TextDecoder('ascii'),utf8=new TextDecoder('utf-8',{fatal:true});
@@ -42,8 +43,8 @@ export function readRomDirectory(bytes){
    fail('INVALID_ROM_DIRECTORY',`ROM 目录中的 ${id} 范围越界`);
  }
  const fex=manifest.resources.faction_expansion;
- if(fex&&(!Number.isInteger(fex.offset)||fex.length!==0x804||fex.schema!=='fex1.payload.v1'||fex.offset+fex.length>bytes.length))
-  fail('INVALID_ROM_DIRECTORY','FEX1 资源声明越界或格式不匹配');
+ if(fex){const layout=factionExpansionLayout(fex);if(!Number.isSafeInteger(fex.offset)||fex.offset<0x200||fex.length!==layout.payloadSize||fex.offset+fex.length>valid.payloadOffset)
+  fail('INVALID_ROM_DIRECTORY','FEX1 资源声明越界或格式不匹配');}
  const glyphs=manifest.resources.place_glyphs;
  const visit=manifest.resources.castle_visit_gate;
  const visitHooks=manifest.resources.native_visit_hooks;
