@@ -1,0 +1,387 @@
+{
+  "schema": "taikou-rom-studio.fex142-labels.v1",
+  "source_manifest": "taikou-rebuild/assets/data/faction-expansion-v142.json",
+  "source_sha256": "8084ce763b7d31816f6c549a2b7d049e248137e0c3921fe4b7402474a1a9709e",
+  "factions": [
+    {
+      "id": 20,
+      "name": "長宗我部",
+      "leaderIdentityName": "長宗我部国親",
+      "leaderCandidate": "長宗我部国親",
+      "leaderId": 571,
+      "seatName": "岡豊城",
+      "seatCastleId": 129
+    },
+    {
+      "id": 21,
+      "name": "本山",
+      "leaderIdentityName": "本山茂辰",
+      "leaderCandidate": "本山茂辰",
+      "leaderId": 293,
+      "seatName": "本山城（地图代理据点；朝倉城暂未入图）",
+      "seatCastleId": 130
+    },
+    {
+      "id": 22,
+      "name": "河野",
+      "leaderIdentityName": "河野通宣",
+      "leaderCandidate": "河野通宣",
+      "leaderId": 589,
+      "seatName": "湯築城",
+      "seatCastleId": 131
+    },
+    {
+      "id": 23,
+      "name": "西園寺",
+      "leaderIdentityName": "西園寺実充",
+      "leaderCandidate": "西園寺実充",
+      "leaderId": 585,
+      "seatName": "黒瀬城",
+      "seatCastleId": 132
+    },
+    {
+      "id": 24,
+      "name": "安芸",
+      "leaderIdentityName": "大西覚用",
+      "leaderCandidate": "安芸国虎",
+      "leaderId": 409,
+      "seatName": "安芸城",
+      "seatCastleId": 149
+    },
+    {
+      "id": 25,
+      "name": "伊達",
+      "leaderIdentityName": "伊達晴宗",
+      "leaderCandidate": "伊達晴宗",
+      "leaderId": 481,
+      "seatName": "米沢城",
+      "seatCastleId": 133
+    },
+    {
+      "id": 26,
+      "name": "芦名",
+      "leaderIdentityName": "蘆名盛氏",
+      "leaderCandidate": "蘆名盛氏",
+      "leaderId": 681,
+      "seatName": "黒川城",
+      "seatCastleId": 134
+    },
+    {
+      "id": 27,
+      "name": "最上",
+      "leaderIdentityName": "最上義守",
+      "leaderCandidate": "最上義守",
+      "leaderId": 464,
+      "seatName": "山形城",
+      "seatCastleId": 135
+    },
+    {
+      "id": 28,
+      "name": "土佐一条",
+      "leaderIdentityName": "小野寺輝道",
+      "leaderCandidate": "一条兼定",
+      "leaderId": 453,
+      "seatName": "中村御所",
+      "seatCastleId": 150
+    },
+    {
+      "id": 29,
+      "name": "安東",
+      "leaderIdentityName": "安東愛季",
+      "leaderCandidate": "安東愛季",
+      "leaderId": 547,
+      "seatName": "檜山城",
+      "seatCastleId": 137
+    },
+    {
+      "id": 30,
+      "name": "南部",
+      "leaderIdentityName": "南部晴政",
+      "leaderCandidate": "南部晴政",
+      "leaderId": 611,
+      "seatName": "三戸城",
+      "seatCastleId": 138
+    },
+    {
+      "id": 31,
+      "name": "相良",
+      "leaderIdentityName": "北畠具運",
+      "leaderCandidate": "相良义阳",
+      "leaderId": 682,
+      "seatName": "人吉城",
+      "seatCastleId": 156
+    },
+    {
+      "id": 32,
+      "name": "相馬",
+      "leaderIdentityName": "相馬盛胤",
+      "leaderCandidate": "相馬盛胤",
+      "leaderId": 584,
+      "seatName": "小高城",
+      "seatCastleId": 140
+    },
+    {
+      "id": 33,
+      "name": "大友",
+      "leaderIdentityName": "大友義鎮",
+      "leaderCandidate": "大友義鎮",
+      "leaderId": 303,
+      "seatName": "大友氏館",
+      "seatCastleId": 142
+    },
+    {
+      "id": 34,
+      "name": "龍造寺",
+      "leaderIdentityName": "龍造寺隆信",
+      "leaderCandidate": "龍造寺隆信",
+      "leaderId": 658,
+      "seatName": "村中城",
+      "seatCastleId": 143
+    },
+    {
+      "id": 35,
+      "name": "有馬",
+      "leaderIdentityName": "有馬義貞",
+      "leaderCandidate": "有馬義貞",
+      "leaderId": 646,
+      "seatName": "日野江城",
+      "seatCastleId": 144
+    },
+    {
+      "id": 36,
+      "name": "島津",
+      "leaderIdentityName": "島津貴久",
+      "leaderCandidate": "島津貴久",
+      "leaderId": 704,
+      "seatName": "内城",
+      "seatCastleId": 146
+    },
+    {
+      "id": 37,
+      "name": "伊東",
+      "leaderIdentityName": "伊東義祐",
+      "leaderCandidate": "伊東義祐",
+      "leaderId": 545,
+      "seatName": "都於郡城／佐土原城",
+      "seatCastleId": 158
+    }
+  ],
+  "castles": [
+    {
+      "id": 123,
+      "name": "津和野城",
+      "ownerFactionId": 16,
+      "governorId": null
+    },
+    {
+      "id": 124,
+      "name": "高嶺城",
+      "ownerFactionId": 16,
+      "governorId": null
+    },
+    {
+      "id": 125,
+      "name": "若山城",
+      "ownerFactionId": 16,
+      "governorId": null
+    },
+    {
+      "id": 126,
+      "name": "右田ヶ岳城",
+      "ownerFactionId": 16,
+      "governorId": null
+    },
+    {
+      "id": 127,
+      "name": "勝瑞城館",
+      "ownerFactionId": 13,
+      "governorId": null
+    },
+    {
+      "id": 128,
+      "name": "白地城",
+      "ownerFactionId": 13,
+      "governorId": null
+    },
+    {
+      "id": 129,
+      "name": "岡豊城",
+      "ownerFactionId": 20,
+      "governorId": 571
+    },
+    {
+      "id": 130,
+      "name": "本山城",
+      "ownerFactionId": 21,
+      "governorId": 293
+    },
+    {
+      "id": 131,
+      "name": "湯築城",
+      "ownerFactionId": 22,
+      "governorId": 589
+    },
+    {
+      "id": 132,
+      "name": "黒瀬城",
+      "ownerFactionId": 23,
+      "governorId": 585
+    },
+    {
+      "id": 133,
+      "name": "米沢城",
+      "ownerFactionId": 25,
+      "governorId": 481
+    },
+    {
+      "id": 134,
+      "name": "黒川城",
+      "ownerFactionId": 26,
+      "governorId": 681
+    },
+    {
+      "id": 135,
+      "name": "山形城",
+      "ownerFactionId": 27,
+      "governorId": 464
+    },
+    {
+      "id": 136,
+      "name": "横手城",
+      "ownerFactionId": 27,
+      "governorId": 521
+    },
+    {
+      "id": 137,
+      "name": "檜山城",
+      "ownerFactionId": 29,
+      "governorId": 547
+    },
+    {
+      "id": 138,
+      "name": "三戸城",
+      "ownerFactionId": 30,
+      "governorId": 611
+    },
+    {
+      "id": 139,
+      "name": "浪岡城",
+      "ownerFactionId": 30,
+      "governorId": 305
+    },
+    {
+      "id": 140,
+      "name": "小高城",
+      "ownerFactionId": 32,
+      "governorId": 584
+    },
+    {
+      "id": 141,
+      "name": "立花城",
+      "ownerFactionId": 33,
+      "governorId": 538
+    },
+    {
+      "id": 142,
+      "name": "大友氏館",
+      "ownerFactionId": 33,
+      "governorId": 303
+    },
+    {
+      "id": 143,
+      "name": "村中城",
+      "ownerFactionId": 34,
+      "governorId": 658
+    },
+    {
+      "id": 144,
+      "name": "日野江城",
+      "ownerFactionId": 35,
+      "governorId": 646
+    },
+    {
+      "id": 145,
+      "name": "隈本城",
+      "ownerFactionId": 33,
+      "governorId": 647
+    },
+    {
+      "id": 146,
+      "name": "内城",
+      "ownerFactionId": 36,
+      "governorId": 704
+    },
+    {
+      "id": 147,
+      "name": "佐土原城",
+      "ownerFactionId": 37,
+      "governorId": 638
+    },
+    {
+      "id": 148,
+      "name": "飫肥城",
+      "ownerFactionId": 36,
+      "governorId": 580
+    },
+    {
+      "id": 149,
+      "name": "安芸城",
+      "ownerFactionId": 24,
+      "governorId": 409
+    },
+    {
+      "id": 150,
+      "name": "中村御所",
+      "ownerFactionId": 28,
+      "governorId": 453
+    },
+    {
+      "id": 151,
+      "name": "十河城",
+      "ownerFactionId": 13,
+      "governorId": null
+    },
+    {
+      "id": 152,
+      "name": "天霧城",
+      "ownerFactionId": 13,
+      "governorId": null
+    },
+    {
+      "id": 153,
+      "name": "岩切城",
+      "ownerFactionId": 25,
+      "governorId": 548
+    },
+    {
+      "id": 154,
+      "name": "角館城",
+      "ownerFactionId": 27,
+      "governorId": null
+    },
+    {
+      "id": 155,
+      "name": "大宝寺城",
+      "ownerFactionId": 27,
+      "governorId": null
+    },
+    {
+      "id": 156,
+      "name": "人吉城",
+      "ownerFactionId": 31,
+      "governorId": 682
+    },
+    {
+      "id": 157,
+      "name": "高山城",
+      "ownerFactionId": 36,
+      "governorId": 560
+    },
+    {
+      "id": 158,
+      "name": "都於郡城",
+      "ownerFactionId": 37,
+      "governorId": 545
+    }
+  ]
+}

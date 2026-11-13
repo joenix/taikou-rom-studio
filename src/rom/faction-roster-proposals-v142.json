@@ -1,0 +1,270 @@
+{
+  "schema": "taikou-rom-studio.faction-roster-proposals.v142.v1",
+  "source": "taikou-rebuild/reports/map-expansion-faction-personnel-design.json",
+  "sourceSha256": "d6d8810cfefed57f7121a9ca93e37e00dc57b27a4cf0cee2a1cb42fe4778be97",
+  "status": "DESIGN_ONLY_NOT_WRITTEN_TO_ROM",
+  "factions": [
+    {
+      "factionId": 20,
+      "sourceFactionName": "长宗我部",
+      "plannedMembers": [
+        {
+          "personId": 302,
+          "targetName": "長宗我部元親",
+          "sourceName": "半田吉就",
+          "status": "PROPOSED_REIDENTIFICATION_SLOT_RUNTIME_BRIDGE_REQUIRED"
+        },
+        {
+          "personId": 489,
+          "targetName": "福留親政",
+          "sourceName": "富田長秀",
+          "status": "PROPOSED_REIDENTIFICATION_SLOT_RUNTIME_BRIDGE_REQUIRED"
+        }
+      ],
+      "appliesToCurrentDraft": true
+    },
+    {
+      "factionId": 21,
+      "sourceFactionName": "本山",
+      "plannedMembers": [],
+      "appliesToCurrentDraft": true
+    },
+    {
+      "factionId": 22,
+      "sourceFactionName": "河野",
+      "plannedMembers": [
+        {
+          "personId": 503,
+          "targetName": "来島通康",
+          "sourceName": "今福昌常",
+          "status": "PROPOSED_REIDENTIFICATION_SLOT_RUNTIME_BRIDGE_REQUIRED"
+        },
+        {
+          "personId": 511,
+          "targetName": "平岡房実",
+          "sourceName": "曽根昌世",
+          "status": "PROPOSED_REIDENTIFICATION_SLOT_RUNTIME_BRIDGE_REQUIRED"
+        }
+      ],
+      "appliesToCurrentDraft": true
+    },
+    {
+      "factionId": 23,
+      "sourceFactionName": "西园寺",
+      "plannedMembers": [],
+      "appliesToCurrentDraft": true
+    },
+    {
+      "factionId": 24,
+      "sourceFactionName": "大西",
+      "plannedMembers": [],
+      "appliesToCurrentDraft": false
+    },
+    {
+      "factionId": 25,
+      "sourceFactionName": "伊达",
+      "plannedMembers": [
+        {
+          "personId": 548,
+          "targetName": "伊達輝宗",
+          "sourceName": "小野木重次",
+          "status": "PROPOSED_REIDENTIFICATION_SLOT_RUNTIME_BRIDGE_REQUIRED"
+        },
+        {
+          "personId": 574,
+          "targetName": "中野宗時",
+          "sourceName": "河田吉久",
+          "status": "PROPOSED_REIDENTIFICATION_SLOT_RUNTIME_BRIDGE_REQUIRED"
+        },
+        {
+          "personId": 553,
+          "targetName": "鬼庭良直",
+          "sourceName": "松田政近",
+          "status": "PROPOSED_REIDENTIFICATION_SLOT_RUNTIME_BRIDGE_REQUIRED"
+        }
+      ],
+      "appliesToCurrentDraft": true
+    },
+    {
+      "factionId": 26,
+      "sourceFactionName": "芦名",
+      "plannedMembers": [
+        {
+          "personId": 652,
+          "targetName": "金上盛備",
+          "sourceName": "千原勝則",
+          "status": "PROPOSED_REIDENTIFICATION_SLOT_RUNTIME_BRIDGE_REQUIRED"
+        },
+        {
+          "personId": 472,
+          "targetName": "猪苗代盛国",
+          "sourceName": "小原忠継",
+          "status": "PROPOSED_REIDENTIFICATION_SLOT_RUNTIME_BRIDGE_REQUIRED"
+        }
+      ],
+      "appliesToCurrentDraft": true
+    },
+    {
+      "factionId": 27,
+      "sourceFactionName": "最上",
+      "plannedMembers": [
+        {
+          "personId": 521,
+          "targetName": "氏家定直",
+          "sourceName": "南志見光連",
+          "status": "PROPOSED_REIDENTIFICATION_SLOT_RUNTIME_BRIDGE_REQUIRED"
+        }
+      ],
+      "appliesToCurrentDraft": true
+    },
+    {
+      "factionId": 28,
+      "sourceFactionName": "小野寺",
+      "plannedMembers": [],
+      "appliesToCurrentDraft": false
+    },
+    {
+      "factionId": 29,
+      "sourceFactionName": "安东",
+      "plannedMembers": [],
+      "appliesToCurrentDraft": true
+    },
+    {
+      "factionId": 30,
+      "sourceFactionName": "南部",
+      "plannedMembers": [
+        {
+          "personId": 305,
+          "targetName": "石川高信",
+          "sourceName": "桑原平内",
+          "status": "PROPOSED_REIDENTIFICATION_SLOT_RUNTIME_BRIDGE_REQUIRED"
+        },
+        {
+          "personId": 578,
+          "targetName": "北信愛",
+          "sourceName": "小宮山友晴",
+          "status": "PROPOSED_REIDENTIFICATION_SLOT_RUNTIME_BRIDGE_REQUIRED"
+        }
+      ],
+      "appliesToCurrentDraft": true
+    },
+    {
+      "factionId": 31,
+      "sourceFactionName": "浪冈北畠",
+      "plannedMembers": [],
+      "appliesToCurrentDraft": false
+    },
+    {
+      "factionId": 32,
+      "sourceFactionName": "相马",
+      "plannedMembers": [],
+      "appliesToCurrentDraft": true
+    },
+    {
+      "factionId": 33,
+      "sourceFactionName": "大友",
+      "plannedMembers": [
+        {
+          "personId": 538,
+          "targetName": "戸次鑑連",
+          "sourceName": "飯沼長継",
+          "status": "PROPOSED_REIDENTIFICATION_SLOT_RUNTIME_BRIDGE_REQUIRED"
+        },
+        {
+          "personId": 647,
+          "targetName": "臼杵鑑速",
+          "sourceName": "笠原政尭",
+          "status": "PROPOSED_REIDENTIFICATION_SLOT_RUNTIME_BRIDGE_REQUIRED"
+        },
+        {
+          "personId": 697,
+          "targetName": "吉岡長増",
+          "sourceName": "谷衛友",
+          "status": "PROPOSED_REIDENTIFICATION_SLOT_RUNTIME_BRIDGE_REQUIRED"
+        }
+      ],
+      "appliesToCurrentDraft": true
+    },
+    {
+      "factionId": 34,
+      "sourceFactionName": "龙造寺",
+      "plannedMembers": [
+        {
+          "personId": 559,
+          "targetName": "鍋島直茂",
+          "sourceName": "小浜景隆",
+          "status": "PROPOSED_REIDENTIFICATION_SLOT_RUNTIME_BRIDGE_REQUIRED"
+        },
+        {
+          "personId": 549,
+          "targetName": "鍋島清房",
+          "sourceName": "芦田作内",
+          "status": "PROPOSED_REIDENTIFICATION_SLOT_RUNTIME_BRIDGE_REQUIRED"
+        }
+      ],
+      "appliesToCurrentDraft": true
+    },
+    {
+      "factionId": 35,
+      "sourceFactionName": "有马",
+      "plannedMembers": [
+        {
+          "personId": 627,
+          "targetName": "有馬晴純",
+          "sourceName": "不破広綱",
+          "status": "PROPOSED_REIDENTIFICATION_SLOT_RUNTIME_BRIDGE_REQUIRED"
+        }
+      ],
+      "appliesToCurrentDraft": true
+    },
+    {
+      "factionId": 36,
+      "sourceFactionName": "岛津",
+      "plannedMembers": [
+        {
+          "personId": 580,
+          "targetName": "島津義久",
+          "sourceName": "斎藤宗林",
+          "status": "PROPOSED_REIDENTIFICATION_SLOT_RUNTIME_BRIDGE_REQUIRED"
+        },
+        {
+          "personId": 560,
+          "targetName": "島津義弘",
+          "sourceName": "国府盛種",
+          "status": "PROPOSED_REIDENTIFICATION_SLOT_RUNTIME_BRIDGE_REQUIRED"
+        },
+        {
+          "personId": 643,
+          "targetName": "島津歳久",
+          "sourceName": "亀井真矩",
+          "status": "PROPOSED_REIDENTIFICATION_SLOT_RUNTIME_BRIDGE_REQUIRED"
+        },
+        {
+          "personId": 644,
+          "targetName": "新納忠元",
+          "sourceName": "伊東政世",
+          "status": "PROPOSED_REIDENTIFICATION_SLOT_RUNTIME_BRIDGE_REQUIRED"
+        }
+      ],
+      "appliesToCurrentDraft": true
+    },
+    {
+      "factionId": 37,
+      "sourceFactionName": "伊东",
+      "plannedMembers": [
+        {
+          "personId": 638,
+          "targetName": "伊東祐安",
+          "sourceName": "遠山友政",
+          "status": "PROPOSED_REIDENTIFICATION_SLOT_RUNTIME_BRIDGE_REQUIRED"
+        }
+      ],
+      "appliesToCurrentDraft": true
+    }
+  ],
+  "notes": [
+    "成员名为拟重设身份；personId 指向现 ROM 人物槽位。",
+    "仅把设计稿与当前 ROM 槽位对应展示；不改 ROM 数据，不表示游戏已分配该势力。",
+    "runtime_faction_id 24、28、31 的源方案势力名称与当前 v1.42 势力稿不同，这三项不自动套用源方案成员。"
+  ]
+}

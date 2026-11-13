@@ -1,6 +1,7 @@
 import {decompressTaikoAsset,unpackTaikoTiles} from './portraits.js';
 import {span,u16,integer,fail} from './codec.js';
 import {readMapExtension,writeMapExtension} from './map-extension.js';
+import {readRomDirectory,relocateRomDirectoryAfterInsert} from './rom-directory.js';
 const HOOK=0x54e4c,ORIGINAL=[0x20,0x7c,0,8,0x8f,0x3f,0x10,0x30,8,0];
 const MAGIC=new TextEncoder().encode('TKICON01');
 const long=(b,p)=>u16(b,p)*65536+u16(b,p+2);
@@ -29,12 +30,13 @@ export function setItemIcon(bytes,id,selector){
  let table=itemIconTable(bytes);if(itemIconSelector(bytes,id)===selector)return bytes;
  let out;
  if(table===null){
-  const map=readMapExtension(bytes),offset=map?map.manifestOffset:bytes.length;
+  const map=readMapExtension(bytes),directory=readRomDirectory(bytes),offset=map?map.manifestOffset:bytes.length;
   if(bytes.length+316>0x200000)fail('INVALID_ITEM_ICONS','超出当前已核对的 ROM 地址范围');
   out=new Uint8Array(bytes.length+316);out.set(bytes.subarray(0,offset));
   out.set(MAGIC,offset);put(out,offset+8,300);put(out,offset+12,1);table=offset+16;
   for(let i=0;i<300;i++)out[table+i]=bytes[0x88f32+i*14+13];
   if(map)writeMapExtension(out,map,offset+316);
+  relocateRomDirectoryAfterInsert(out,directory,offset,316);
   out.set([0x20,0x7c],HOOK);put(out,HOOK+2,table);out.set([0x10,0x30,0x18,0],HOOK+6);
   put(out,0x1a4,out.length-1);
  }else out=new Uint8Array(bytes);

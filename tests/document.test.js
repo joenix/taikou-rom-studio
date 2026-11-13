@@ -33,7 +33,7 @@ test('单人多字段是一个事务，保持文化技能与相性高四位，�
 });
 test('无效字符、名称过长、非法数值、跨资源字段和过期草稿全部原子拒绝',()=>{
  const d=make(),before=d.workingBytes;
- for(const [kind,id,draft,code] of [['people',0,{family:'😀'},'UNENCODABLE_TEXT'],['people',0,{family:'1234567'},'TEXT_TOO_LONG'],['people',0,{attrs:[1,2,3,4,5,-1]},'INVALID_FIELD'],['people',0,{family:'OK',attrs:[1,2,3,4,5,NaN]},'INVALID_FIELD'],['people',0,{rank:8},'UNSUPPORTED_FIELD'],['factions',0,{name:'test'},'READ_ONLY_RESOURCE']]){
+ for(const [kind,id,draft,code] of [['people',0,{family:'😀'},'UNENCODABLE_TEXT'],['people',0,{family:'1234567'},'TEXT_TOO_LONG'],['people',0,{attrs:[1,2,3,4,5,-1]},'INVALID_FIELD'],['people',0,{family:'OK',attrs:[1,2,3,4,5,NaN]},'INVALID_FIELD'],['people',0,{rank:8},'UNSUPPORTED_FIELD'],['factions',0,{name:'test'},'UNSUPPORTED_FIELD']]){
   assert.throws(()=>d.applyRecord(kind,id,draft),e=>e.code===code);assert.deepEqual(d.workingBytes,before);
  }
  d.applyRecord('items',0,{value:1});assert.throws(()=>d.applyRecord('items',1,{value:2},0),e=>e.code==='STALE_DRAFT');

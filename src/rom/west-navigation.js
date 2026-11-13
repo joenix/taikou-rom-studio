@@ -1,8 +1,11 @@
+import {readRomDirectory} from './rom-directory.js';
 import {WEST_LAYOUT as L,readWestLayout,put} from './west-layout.js';
 import {fail} from './codec.js';
+import {requireExternalRoadRebuild} from './road-flow.js';
 const D=[[0,-1],[1,0],[0,1],[-1,0]];
 /** Same serialized ABI as rebuild/tools/map_component_graph.py; verified against its ROM bytes. */
 export function buildNavigation(bytes,rows,address,spec=L){
+ const weighted=readRomDirectory(bytes)?.manifest.resources.route_search?.schema==='component-weighted-astar.v1';
  const chunks=[],components={};let length=0;const append=b=>{chunks.push(b);length+=b.length;},coord=new Map(rows.map((r,i)=>[`${r.x},${r.y}`,i]));
  for(const sailing of [false,true]){
   const maps=[],owners=[];
@@ -23,6 +26,33 @@ export function buildNavigation(bytes,rows,address,spec=L){
     const key=b*4+direction;edges[a].set(key,(edges[a].get(key)||0)|(1<<k));
    }
   }
+  // Symmetric terrain-aware edge weight, in half-tile units. For each side of
+  // a sector boundary, measure mean within-component distance to its actual
+  // passable border cells. The shared weight is admissible for reverse A* and
+  // is intentionally an estimate; local movement still uses the game planner.
+  const portalMean=(node,direction,mask)=>{
+   const sector=owners[node],labels=maps[sector],portals=[];
+   for(let k=0;k<8;k++)if(mask&(1<<k))portals.push(direction===0?k:direction===1?k*8+7:direction===2?56+k:k*8);
+   const dist=new Int16Array(64).fill(-1),queue=[];
+   for(const cell of portals)if(labels[cell]===node){dist[cell]=0;queue.push(cell);}
+   for(let head=0;head<queue.length;head++){
+    const cell=queue[head],x=cell&7,y=cell>>3;
+    for(const next of [y?cell-8:-1,x<7?cell+1:-1,y<7?cell+8:-1,x?cell-1:-1])
+     if(next>=0&&labels[next]===node&&dist[next]<0){dist[next]=dist[cell]+1;queue.push(next);}
+   }
+   let total=0,count=0;for(let cell=0;cell<64;cell++)if(labels[cell]===node&&dist[cell]>=0){total+=dist[cell];count++;}
+   if(!count)fail('MAP_NAV_WEIGHT','跨区入口没有落在所属连通区');
+   return total/count;
+  };
+  const edgeWeights=edges.map((adj,node)=>new Map([...adj].map(([key,mask])=>{
+   const other=Math.floor(key/4),direction=key%4,reverseDirection=(direction+2)%4;
+   const mean=(portalMean(node,direction,mask)+portalMean(other,reverseDirection,mask)+1)/4;
+   return [key,Math.max(1,Math.floor(mean+0.5))];
+  })));
+  for(let node=0;node<edges.length;node++)for(const [key,weight] of edgeWeights[node]){
+   const other=Math.floor(key/4),reverseKey=node*4+((key%4+2)%4);
+   if(edgeWeights[other].get(reverseKey)!==weight)fail('MAP_NAV_WEIGHT_ASYMMETRY','跨区路线权重不是对称值');
+  }
   // Verify the original bounded ring queue for every destination, including disconnected terrain.
   const sortedEdges=edges.map(e=>[...e.keys()].sort((a,b)=>a-b));
   let frontier=0,maxDistance=0;for(let goal=0;goal<owners.length;goal++){
@@ -33,7 +63,7 @@ export function buildNavigation(bytes,rows,address,spec=L){
   if(maxDistance>(spec.distanceLimit??65534))fail('MAP_NAV_DISTANCE','当前地形的最远寻路距离超出游戏容量，请缩短绕路或连通区域');
   const map=address+length,mapData=new Uint8Array(rows.length*128);maps.forEach((m,i)=>m.forEach((v,k)=>put(mapData,i*128+k*2,v,2)));append(mapData);
   const nodesAt=address+length,edgeCount=edges.reduce((n,e)=>n+e.size,0),nodesData=new Uint8Array(owners.length*8),edgeData=new Uint8Array(edgeCount*8);let cursor=0;
-  edges.forEach((adj,i)=>{put(nodesData,i*8,owners[i],2);put(nodesData,i*8+2,adj.size,2);put(nodesData,i*8+4,nodesAt+nodesData.length+cursor);for(const [key,mask]of [...adj].sort((a,b)=>a[0]-b[0])){put(edgeData,cursor,Math.floor(key/4),2);put(edgeData,cursor+2,key%4,2);put(edgeData,cursor+4,mask,2);cursor+=8;}});
+  edges.forEach((adj,i)=>{put(nodesData,i*8,owners[i],2);put(nodesData,i*8+2,adj.size,2);put(nodesData,i*8+4,nodesAt+nodesData.length+cursor);for(const [key,mask]of [...adj].sort((a,b)=>a[0]-b[0])){put(edgeData,cursor,Math.floor(key/4),2);put(edgeData,cursor+2,key%4,2);put(edgeData,cursor+4,mask,2);put(edgeData,cursor+6,weighted?edgeWeights[i].get(key):0,2);cursor+=8;}});
   append(nodesData);append(edgeData);components[sailing?'sailing':'land']={map,nodesAt,nodes:owners.length,edges:edgeCount,maxFrontier:frontier,maxDistance};
  }
  const blob=new Uint8Array(length);let p=0;for(const chunk of chunks){blob.set(chunk,p);p+=chunk.length;}return {blob,components};
@@ -42,6 +72,7 @@ export function buildNavigation(bytes,rows,address,spec=L){
 export function terrainFingerprint(bytes,rows){let hash=2166136261;for(const r of rows)for(let i=0;i<64;i++)hash=Math.imul(hash^bytes[r.pointer+i],16777619)>>>0;return hash;}
 export function worldNavigationDirty(bytes){const l=readWestLayout(bytes);if(!l)return false;const expected=l.nav?.terrainFingerprint??l.terrainFingerprint;return expected===undefined||terrainFingerprint(bytes,l.rows)!==expected;}
 export function rebuildWestNavigation(bytes){
+ requireExternalRoadRebuild(bytes);
  const layout=readWestLayout(bytes);if(!layout)return bytes;
  const L=layout;
  if(L.navigationStorage==='fixed-capacity-banks')return rebuildFixedNavigation(bytes,L);
