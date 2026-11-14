@@ -5,6 +5,8 @@ import {readRomDirectory} from './rom-directory.js';
 import {u16,span,integer,fail} from './codec.js';
 export const FACILITY_NAMES=['宿屋','茶屋','医师','米店','马店'];
 export const TOWN_GROUND=Array.from({length:20},(_,i)=>68+i).filter(n=>n!==83&&n!==84);
+export const TOWN_DECORATIONS=[{code:41,name:'马匹'},{code:42,name:'米俵'},{code:43,name:'石制摆件'},{code:44,name:'小祠'},{code:61,name:'木桶'},{code:68,name:'井'},{code:69,name:'石碑'},{code:79,name:'树木'}];
+export const TOWN_PAINTABLE=[...new Set([...TOWN_GROUND,...TOWN_DECORATIONS.map(t=>t.code)])];
 const WALK=new Set([80,81,82,83,84,85,86,87,105]);
 const long=(b,p)=>u16(b,p)*65536+u16(b,p+2);
 const motifs=[{name:'住宅',tiles:[45,46,47,48,89,49],width:3},{name:'住宅',tiles:[45,46,47,48,96,49],width:3},{name:'住宅',tiles:[0,1,2,3,90,4],width:3},{name:'道场',tiles:[53,54,55,56,97,57],width:3},{name:'道场',tiles:[58,59,60,61,98,62],width:3},{name:'道场',tiles:[63,64,65,99],width:2},{name:'住宅',tiles:[51,52,53,101],width:2},{name:'住宅',tiles:[54,55,56,102],width:2},{name:'住宅',tiles:[56,57,95,58],width:2}];
@@ -28,7 +30,8 @@ export function townEditSnapshot(bytes,id){
  if(new Set(offsets).size!==768)fail('SHARED_TOWN_BLOCK','此町内部有共用图块，暂不支持直接编辑');
  const directory=readRomDirectory(bytes),limit=directory?.payloadOffset??bytes.length;
  if(offsets.some(p=>p<0x200||p>=limit)||facilities.some(f=>f.offset<0x200||f.offset+6>limit))fail('INVALID_TOWN_EDIT','町内资源越界');
- return {...map,id,offsets,facilities,buildings,spawns};
+ const decorations=Array.from(map.cells,(code,i)=>{const item=TOWN_DECORATIONS.find(t=>t.code===code);return item&&!buildings.some(f=>contains(f,i%32,Math.floor(i/32)))?{...item,x:i%32,y:Math.floor(i/32),width:1,height:1}:null;}).filter(Boolean);
+ return {...map,id,offsets,facilities,buildings,decorations,spawns};
 }
 export function makeTownInteriorPatches(bytes,id,draft){
  const m=townEditSnapshot(bytes,id),cells=Array.from(m.cells),updates=new Map(),patches=[],moved=new Map(),doorMoves=new Map();
@@ -46,8 +49,8 @@ export function makeTownInteriorPatches(bytes,id,draft){
   for(let y=0;y<r.height;y++)for(let x=0;x<r.width;x++)cells[(target.y+y)*32+target.x+x]=copy[y*r.width+x];
   for(const f of m.facilities)if(contains(r,f.door.x,f.door.y)){const x=f.door.x+dx,y=f.door.y+dy,sid=m.base+(y>>>3)*41+(x>>>3);add(f.offset+2,sid>>>8);add(f.offset+3,sid&255);add(f.offset+4,x&7);add(f.offset+5,y&7);moved.set(f.record,{x,y});}
  }else if(draft.action==='paint'){
-  const r=bounds(draft.rect);if(!TOWN_GROUND.includes(draft.code))fail('INVALID_TOWN_PAINT','请选择地形图块');
-  for(let y=r.y;y<r.y+r.height;y++)for(let x=r.x;x<r.x+r.width;x++){if(m.spawns.some(p=>p.x===x&&p.y===y)||cells[y*32+x]===105)fail('TOWN_ENTRY_PROTECTED','町入口和出口不可覆盖');if(!TOWN_GROUND.includes(cells[y*32+x]))fail('TOWN_BUILDING_PROTECTED','建筑请整栋移动，不能用地形覆盖');cells[y*32+x]=draft.code;}
+  const r=bounds(draft.rect);if(!TOWN_PAINTABLE.includes(draft.code))fail('INVALID_TOWN_PAINT','请选择地形图块');
+  for(let y=r.y;y<r.y+r.height;y++)for(let x=r.x;x<r.x+r.width;x++){if(m.spawns.some(p=>p.x===x&&p.y===y)||cells[y*32+x]===105)fail('TOWN_ENTRY_PROTECTED','町入口和出口不可覆盖');if(m.buildings.some(f=>contains(f,x,y))||!TOWN_PAINTABLE.includes(cells[y*32+x]))fail('TOWN_BUILDING_PROTECTED','建筑请整栋移动，不能用地形覆盖');cells[y*32+x]=draft.code;}
  }else fail('INVALID_TOWN_EDIT','不支持的町内编辑操作');
  for(const seed of m.spawns){const old=reach(m.cells,seed),next=reach(cells,seed);
   const adjacent=(i,seen)=>{const x=i%32,y=Math.floor(i/32);return [[x,y-1],[x+1,y],[x,y+1],[x-1,y]].some(([xx,yy])=>xx>=0&&xx<32&&yy>=0&&yy<24&&seen.has(yy*32+xx));};
