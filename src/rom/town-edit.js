@@ -41,7 +41,7 @@ export function makeTownInteriorPatches(bytes,id,draft){
   for(const f of m.buildings){const intersects=(a,b)=>a.x<b.x+b.width&&a.x+a.width>b.x&&a.y<b.y+b.height&&a.y+a.height>b.y;if(intersects(r,f)&&!(contains(r,f.x,f.y)&&contains(r,f.x+f.width-1,f.y+f.height-1)))fail('PARTIAL_TOWN_BUILDING','请选择完整建筑后再移动');}
   for(let y=r.y;y<r.y+r.height;y++)for(let x=r.x;x<r.x+r.width;x++)if(cells[y*32+x]>=88&&cells[y*32+x]<=104)doorMoves.set(y*32+x,(y+dy)*32+x+dx);
   const copy=[];for(let y=0;y<r.height;y++)for(let x=0;x<r.width;x++)copy.push(cells[(r.y+y)*32+r.x+x]);
-  for(let y=target.y;y<target.y+target.height;y++)for(let x=target.x;x<target.x+target.width;x++)if(!contains(r,x,y)&&![80,81].includes(cells[y*32+x]))fail('TOWN_MOVE_COLLISION','目标区域有建筑或景物，请选择空地');
+  for(let y=target.y;y<target.y+target.height;y++)for(let x=target.x;x<target.x+target.width;x++)if(!contains(r,x,y)&&![80,81,82,85,86,87].includes(cells[y*32+x]))fail('TOWN_MOVE_COLLISION','目标区域有建筑或景物，请选择空地');
   for(let y=r.y;y<r.y+r.height;y++)for(let x=r.x;x<r.x+r.width;x++)cells[y*32+x]=80;
   for(let y=0;y<r.height;y++)for(let x=0;x<r.width;x++)cells[(target.y+y)*32+target.x+x]=copy[y*r.width+x];
   for(const f of m.facilities)if(contains(r,f.door.x,f.door.y)){const x=f.door.x+dx,y=f.door.y+dy,sid=m.base+(y>>>3)*41+(x>>>3);add(f.offset+2,sid>>>8);add(f.offset+3,sid&255);add(f.offset+4,x&7);add(f.offset+5,y&7);moved.set(f.record,{x,y});}
