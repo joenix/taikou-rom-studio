@@ -1,7 +1,7 @@
 import {townEditSnapshot,makeTownInteriorPatches} from './town-edit.js';
 import {verifyRuntimeResources} from './resource-contracts.js';
 import {overviewCapability,readOverview,overviewPatches} from './overview.js';
-import {isWestRom,worldLayoutSpec} from './west-layout.js';
+import {isWestRom,worldLayoutSpec,readWestLayout} from './west-layout.js';
 import {rebuildWestNavigation,worldNavigationDirty} from './west-navigation.js';
 import {readAppearance,verifyAppearance} from './appearance.js';
 import {itemCategory} from './item-categories.js';
@@ -21,7 +21,7 @@ import {span,u16,decodeText,encodeField,integer,fail,checksum} from './codec.js'
 export class RomDocument {
  #original;#bytes;#imported;#undo=[];#redo=[];#writeGuard=()=>true;
  setWriteGuard(guard){this.#writeGuard=guard;}
- #requireWrite(resource=null){if(this.editPolicy==='readonly-trial')fail('READ_ONLY_ROM','这份试玩 ROM 暂仅支持浏览，编辑导出尚未开放');if(resource?.startsWith('map-'))requireExternalRoadRebuild(this.#bytes);if(this.editPolicy==='overview-only'&&resource&&!['overview','town-interior'].includes(resource))fail('READ_ONLY_RESOURCE','当前 ROM 开放势力图与町内地图编辑');if(!this.#writeGuard())fail("READ_ONLY_MODE","当前设备或模式仅支持查看");}
+ #requireWrite(resource=null){if(this.editPolicy==='readonly-trial')fail('READ_ONLY_ROM','这份试玩 ROM 暂仅支持浏览，编辑导出尚未开放');if(resource?.startsWith('map-'))requireExternalRoadRebuild(this.#bytes);if(this.editPolicy==='overview-only'&&resource&&!['overview','town-interior','castles'].includes(resource))fail('READ_ONLY_RESOURCE','当前 ROM 开放城池资料、势力图与町内地图编辑');if(!this.#writeGuard())fail("READ_ONLY_MODE","当前设备或模式仅支持查看");}
  constructor(bytes,filename,sha256,importedBytes=bytes){
   this.validation=validateRom(bytes);this.directory=this.validation.directory||readRomDirectory(bytes);const ext=readMapExtension(bytes);if(ext){verifyTownEngine(bytes,ext);requireWorldMap(bytes);}this.#imported=new Uint8Array(importedBytes);this.#original=new Uint8Array(bytes);this.#bytes=new Uint8Array(bytes);
   this.runtimeResources=verifyRuntimeResources(bytes,this.directory);this.appearance=readAppearance(bytes);this.factionExpansion=readFactionExpansion(bytes,this.directory);this.residentBindings=residentBindings(bytes,this.directory);this.newOfficerIds=new Set(this.residentBindings.keys());this.filename=filename;this.sha256=sha256;this.revision=0;
@@ -113,14 +113,21 @@ export class RomDocument {
   return {id,name:decodeText(b,p,10),value:b[p+11],category,categoryKey:classification.key,categoryName:classification.label,iconSelector:itemIconSelector(b,id),grade:category===0x60?meta&15:null,meta,extra:b[p+13],offset:p,instances:this.instances.filter(s=>s.itemId===id),raw:Array.from(span(b,p,14))};
  }
  readCastle(id){
-  integer(id,0,124,'城池 ID');const b=this.#bytes,p=PROFILE.castles.base+id*20;
-  return {id,name:decodeText(b,p,9),offset:p,state:readCastleState(b,id),location:{x:(u16(b,p+14)%41)*8+b[p+16],y:Math.floor(u16(b,p+14)/41)*8+b[p+17]},neighbors:Array.from(span(b,p+9,4)).filter(n=>n!==255),raw:Array.from(span(b,p,20))};
+  const defs=this.directory?.manifest.resources.castle_visit_definitions;
+  const expanded=defs?.schema==='castle.visit-definitions.v1';
+  integer(id,0,expanded?defs.count-1:124,'城池 ID');const b=this.#bytes,p=expanded?defs.offset+id*defs.stride:PROFILE.castles.base+id*20;
+  const ext=id>=123?readFactionExpansion(b,this.directory)?.castles.find(c=>c.id===id):null;
+  let state=readCastleState(b,Math.min(id,124));
+  if(ext){state={runtimeId:id,offset:ext.offset,governorId:ext.governorId,factionId:ext.ownerFactionId};for(const f of CASTLE_FIELDS){const raw=f.word?u16(b,ext.offset+f.offset):b[ext.offset+f.offset];state[f.key]=(f.mask===undefined?raw:raw&f.mask)*(f.unit||1);}}
+
+  const sector=isWestRom(b)?readWestLayout(b).byId.get(u16(b,p+14)):null;
+  return {id,name:decodeText(b,p,9),offset:p,state,location:{x:(sector?sector.x*8:(u16(b,p+14)%41)*8)+b[p+16],y:(sector?sector.y*8:Math.floor(u16(b,p+14)/41)*8)+b[p+17]},neighbors:Array.from(span(b,p+9,4)).filter(n=>n!==255),raw:Array.from(span(b,p,20))};
  }
  get instances(){return Array.from({length:80},(_,slot)=>{const p=PROFILE.instances.base+slot*4;return {slot,itemId:u16(this.#bytes,p),ownerRaw:u16(this.#bytes,p+2),offset:p};});}
  snapshot(){
   const people=Array.from({length:713},(_,i)=>this.readPerson(i));
   const items=Array.from({length:300},(_,i)=>this.readItem(i));
-  const castles=Array.from({length:125},(_,i)=>this.readCastle(i));
+  const castles=Array.from({length:this.directory?.manifest.resources.castle_visit_definitions?.count??125},(_,i)=>this.readCastle(i));
   const groups=new Map();
   for(const p of people){if(!groups.has(p.factionId))groups.set(p.factionId,[]);groups.get(p.factionId).push(p);}
   const factions=[...groups.entries()].filter(([id])=>!this.factionExpansion||id<20||id===255).sort((a,b)=>a[0]-b[0]).map(([id,members])=>{
@@ -159,7 +166,7 @@ export class RomDocument {
   const factionNames=new Map(factions.map(f=>[f.id,f.name]));
   const castleNames=new Map(castles.map(c=>[c.id,c.name]));for(const c of this.factionExpansion?.castles||[])castleNames.set(c.id,c.name);
   for(const p of people){p.factionName=factionNames.get(p.factionId);p.castleName=p.castleId===255?'未设置':castleNames.get(p.castleId)||'未确认';}
-  for(const c of castles){c.factionName=c.state?(c.state.factionId===255?'无主':factionNames.get(c.state.factionId)||`势力 #${c.state.factionId}`):'未确认';c.governorName=c.state?(c.state.governorId<241?people[c.state.governorId]?.name||'未确认':'无城主'):'未确认';c.residents=people.filter(p=>p.castleId===c.id);c.neighborNames=c.neighbors.map(id=>castles[id].name);}
+  for(const c of castles){c.factionName=c.state?(c.state.factionId===255?'无主':factionNames.get(c.state.factionId)||`势力 #${c.state.factionId}`):'未确认';c.governorName=c.state?(c.state.governorId<713?people[c.state.governorId]?.name||'未确认':'无城主'):'未确认';c.residents=people.filter(p=>p.castleId===c.id);c.neighborNames=c.neighbors.map(id=>castles[id]?.name||`城 #${id}`);}
   return {people,items,castles,factions};
  }
  applyRecord(kind,id,draft,expectedRevision=this.revision){this.#requireWrite(kind);
@@ -186,7 +193,7 @@ export class RomDocument {
   }else if(kind==='items'){
    const item=this.readItem(id);label=item.name;if(draft.name!==undefined)setText(item.offset,10,draft.name);
    if(draft.value!==undefined)add(item.offset+11,[integer(draft.value,0,255,'基础价值')]);
-  }else if(kind==='castles'){const castle=this.readCastle(id);label=castle.name;if(draft.name!==undefined)setText(castle.offset,9,draft.name);for(const f of CASTLE_FIELDS)if(draft[f.key]!==undefined){if(!castle.state)fail('INVALID_CASTLE','此资料没有已确认的城池运行记录');const write=castleFieldBytes(this.#bytes,castle.state,f.key,draft[f.key]);add(write.offset,write.data);}}
+  }else if(kind==='castles'){const castle=this.readCastle(id);label=castle.name;if(id>=123&&this.factionExpansion&&draft.name!==undefined&&draft.name!==castle.name)fail('UNSUPPORTED_FIELD','新增城池名称关联多个游戏窗口，当前仅开放资源与军备编辑');if(draft.name!==undefined){setText(castle.offset,9,draft.name);if(id<123&&castle.offset!==PROFILE.castles.base+id*20)setText(PROFILE.castles.base+id*20,9,draft.name);}for(const f of CASTLE_FIELDS)if(draft[f.key]!==undefined){if(!castle.state)fail('INVALID_CASTLE','此资料没有已确认的城池运行记录');const write=castleFieldBytes(this.#bytes,castle.state,f.key,draft[f.key]);add(write.offset,write.data);}}
   else{const faction=this.snapshot().factions.find(row=>row.id===id&&row.expansion);if(!faction)fail('READ_ONLY_RESOURCE','原版势力仍保持只读');label=faction.name;for(const patch of writeFactionExpansion(this.#bytes,this.factionExpansion,id,draft))proposed.set(patch.offset,patch.after);}
   const patches=[...proposed].sort((a,b)=>a[0]-b[0]).map(([offset,after])=>({offset,before:this.#bytes[offset],after}));
   for(const patch of patches)if(!this.#recordOwns(kind,id,patch.offset))fail('CROSS_RECORD_WRITE','写入超出当前记录的允许范围',{kind,id,offset:patch.offset});
@@ -203,7 +210,7 @@ export class RomDocument {
    return(offset>=n+2&&offset<n+18)||(offset>=p+0x27&&offset<=p+0x2e)||offset===p+0x3b;
   }
   if(kind==='items'){const p=PROFILE.items.base+id*14;return(offset>=p&&offset<p+10)||offset===p+11;}
-  if(kind==='castles'){const p=PROFILE.castles.base+id*20;const state=readCastleState(this.#bytes,id);return offset>=p&&offset<p+9||!!state&&offset>=state.offset+3&&offset<=state.offset+15;}
+  if(kind==='castles'){const castle=this.readCastle(id),p=castle.offset,state=castle.state,legacy=PROFILE.castles.base+id*20;return offset>=p&&offset<p+9||id<123&&offset>=legacy&&offset<legacy+9||!!state&&offset>=state.offset+3&&offset<=state.offset+15;}
   if(kind==='factions'){const f=this.factionExpansion?.factions.find(row=>row.id===id);return !!f&&(offset>=this.factionExpansion.payloadOffset+0x798+(id-20)*2&&offset<this.factionExpansion.payloadOffset+0x79a+(id-20)*2||offset===f.offset+21);}
   return false;
  }
