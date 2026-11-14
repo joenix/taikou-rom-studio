@@ -270,3 +270,5 @@ th{font-size:11px;color:#738095}td{font-size:12px;color:#657389}.row-id{font-siz
 .town-editor-actions input{width:58px;padding:7px}.town-editor-actions label{font-size:13px}
 
 .town-drag-feedback{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:9px 12px;margin-bottom:10px;background:#f2f6ec;border:1px solid #d5dfc7;border-radius:5px;font-size:13px}.town-drag-feedback small{margin-left:auto;color:var(--muted)}
+
+.town-editor-layout{position:relative}.town-editor-error{position:absolute;z-index:5;top:12px;left:12px;max-width:min(480px,calc(100% - 24px));padding:10px 14px;border:1px solid #e4b8bd;border-radius:7px;background:#fff3f4f5;color:#994853;box-shadow:0 3px 14px #3f172524;font-size:13px;line-height:1.6;overflow-wrap:anywhere;pointer-events:none}

@@ -5,7 +5,7 @@ import {readRomDirectory} from './rom-directory.js';
 import {u16,span,integer,fail} from './codec.js';
 export const FACILITY_NAMES=['宿屋','茶屋','医师','米店','马店'];
 export const TOWN_GROUND=Array.from({length:20},(_,i)=>68+i).filter(n=>n!==83&&n!==84);
-export const TOWN_DECORATIONS=[{code:41,name:'马匹'},{code:42,name:'米俵'},{code:43,name:'石制摆件'},{code:44,name:'小祠'},{code:61,name:'木桶'},{code:68,name:'井'},{code:69,name:'石碑'},{code:79,name:'树木'}];
+export const TOWN_DECORATIONS=[{code:17,name:'树木一'},{code:18,name:'树木二'},{code:19,name:'树木三'},{code:50,name:'围栏'},{code:85,name:'田地'},{code:41,name:'马匹'},{code:42,name:'米俵'},{code:43,name:'石制摆件'},{code:44,name:'小祠'},{code:61,name:'木桶'},{code:68,name:'井'},{code:69,name:'石碑'},{code:79,name:'树木'}];
 export const TOWN_PAINTABLE=[...new Set([...TOWN_GROUND,...TOWN_DECORATIONS.map(t=>t.code)])];
 const WALK=new Set([80,81,82,83,84,85,86,87,105]);
 const long=(b,p)=>u16(b,p)*65536+u16(b,p+2);
