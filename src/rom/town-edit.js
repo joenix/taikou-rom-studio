@@ -8,7 +8,15 @@ export const FACILITY_NAMES=['宿屋','茶屋','医师','米店','马店'];
 export const TOWN_GROUND=Array.from({length:20},(_,i)=>68+i).filter(n=>n!==83&&n!==84);
 export const TOWN_DECORATIONS=[{code:17,name:'树木一'},{code:18,name:'树木二'},{code:19,name:'树木三'},{code:50,name:'围栏'},{code:85,name:'田地'},{code:41,name:'马匹'},{code:42,name:'米俵'},{code:43,name:'石制摆件'},{code:44,name:'小祠'},{code:61,name:'木桶'},{code:68,name:'井'},{code:69,name:'石碑'},{code:79,name:'树木'}];
 export const TOWN_PAINTABLE=[...new Set([...TOWN_GROUND,...TOWN_DECORATIONS.map(t=>t.code)])];
-export function townPaintPalette(bytes,id){const {profile}=townSceneProfile(bytes,id);const ground=profile===1?TOWN_GROUND:[80,81,82,85,86,87];const decorations=profile===1?TOWN_DECORATIONS:TOWN_DECORATIONS.filter(t=>[17,18,19,41,42,43,44,85].includes(t.code));return {ground,decorations,paintable:[...new Set([...ground,...decorations.map(t=>t.code)])]};}
+const GARDEN_TILES=[{code:20,name:'池塘左侧'},{code:21,name:'池塘右侧'},{code:37,name:'板围栏左侧'},{code:38,name:'板围栏右侧'},{code:39,name:'木围栏左侧'},{code:40,name:'木围栏右侧'}];
+const WOOD_WALLS=[50,51,52,53,54,55,56,57].map((code,i)=>({code,name:'木围墙'+['左上角','上横段','右上角','左竖段','横段','右竖段','左下角','右下角'][i]}));
+const PORT_WALLS=[{code:65,name:'围墙左上角'},{code:66,name:'围墙横段'},{code:67,name:'围墙右上角'},{code:68,name:'围墙竖段'},{code:69,name:'围墙左下角'},{code:70,name:'围墙右下角'},{code:87,name:'院门左侧'},{code:88,name:'院门右侧'}];
+export function townPaintPalette(bytes,id){
+ const {profile}=townSceneProfile(bytes,id),ground=profile===1?TOWN_GROUND:[80,81,82,85,86,87];
+ const base=profile===1?TOWN_DECORATIONS:TOWN_DECORATIONS.filter(t=>[17,18,19,41,42,43,44,85].includes(t.code));
+ const decorations=[...new Map([...base,...GARDEN_TILES,...(profile===1?WOOD_WALLS:profile===2?PORT_WALLS:[])].map(t=>[t.code,t])).values()];
+ return {ground,decorations,paintable:[...new Set([...ground,...decorations.map(t=>t.code)])]};
+}
 const PORT_MOTIFS=[{name:'住宅',tiles:[45,46,47,48,89,49],width:3},{name:'商人宅',tiles:[57,58,59,60,98,61],width:3},{name:'住宅',tiles:[0,1,2,3,90,4],width:3},{name:'茶人宅',tiles:[62,63,64,99],width:2},{name:'南蛮商馆',tiles:[54,55,56,102],width:2},{name:'南蛮寺',tiles:[49,50,51,52,53,101],width:2}];
 const WALK=new Set([80,81,82,83,84,85,86,87,105]);
 const long=(b,p)=>u16(b,p)*65536+u16(b,p+2);
