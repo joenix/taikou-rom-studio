@@ -1,3 +1,4 @@
+import {rebuildRoadFlowAsync} from './road-flow-async.js';
 import {townEditSnapshot,makeTownInteriorPatches} from './town-edit.js';
 import {verifyRuntimeResources} from './resource-contracts.js';
 import {overviewCapability,readOverview,overviewPatches} from './overview.js';
@@ -16,12 +17,12 @@ import {PROFILE,STATS,SKILLS,RANKS,hex} from './profile.js';
 import {validateRom} from './validate.js';
 import {readRomDirectory} from './rom-directory.js';
 import {residentBindings} from './new-officers.js';
-import {readRoadFlow,requireExternalRoadRebuild} from './road-flow.js';
+import {readRoadFlow,requireExternalRoadRebuild,supportsRoadFlowRebuild} from './road-flow.js';
 import {span,u16,decodeText,encodeField,integer,fail,checksum} from './codec.js';
 export class RomDocument {
  #original;#bytes;#imported;#undo=[];#redo=[];#writeGuard=()=>true;
  setWriteGuard(guard){this.#writeGuard=guard;}
- #requireWrite(resource=null){if(this.editPolicy==='readonly-trial')fail('READ_ONLY_ROM','这份试玩 ROM 暂仅支持浏览，编辑导出尚未开放');if(resource?.startsWith('map-'))requireExternalRoadRebuild(this.#bytes);if(this.editPolicy==='overview-only'&&resource&&!['overview','town-interior','castles'].includes(resource))fail('READ_ONLY_RESOURCE','当前 ROM 开放城池资料、势力图与町内地图编辑');if(!this.#writeGuard())fail("READ_ONLY_MODE","当前设备或模式仅支持查看");}
+ #requireWrite(resource=null){if(this.editPolicy==='readonly-trial')fail('READ_ONLY_ROM','这份试玩 ROM 暂仅支持浏览，编辑导出尚未开放');if(resource?.startsWith('map-')&&!(resource==='map-terrain'&&supportsRoadFlowRebuild(this.#bytes)))requireExternalRoadRebuild(this.#bytes);if(resource&&!this.canEditResource(resource))fail('READ_ONLY_RESOURCE','此项资源尚未开放编辑');if(!this.#writeGuard())fail("READ_ONLY_MODE","当前设备或模式仅支持查看");}
  constructor(bytes,filename,sha256,importedBytes=bytes){
   this.validation=validateRom(bytes);this.directory=this.validation.directory||readRomDirectory(bytes);const ext=readMapExtension(bytes);if(ext){verifyTownEngine(bytes,ext);requireWorldMap(bytes);}this.#imported=new Uint8Array(importedBytes);this.#original=new Uint8Array(bytes);this.#bytes=new Uint8Array(bytes);
   this.runtimeResources=verifyRuntimeResources(bytes,this.directory);this.appearance=readAppearance(bytes);this.factionExpansion=readFactionExpansion(bytes,this.directory);this.residentBindings=residentBindings(bytes,this.directory);this.newOfficerIds=new Set(this.residentBindings.keys());this.filename=filename;this.sha256=sha256;this.revision=0;
@@ -36,6 +37,7 @@ export class RomDocument {
  get byteLength(){return this.#bytes.length;}
  get roadRouting(){return readRoadFlow(this.#bytes);}
  get editPolicy(){return this.directory?.manifest?.build?.edit_policy||'editable';}
+ canEditResource(resource){return this.editPolicy!=='readonly-trial'&&(this.editPolicy!=='overview-only'||['people','items','castles','overview','town-interior'].includes(resource)||resource==='map-terrain'&&supportsRoadFlowRebuild(this.#bytes));}
  get canUndo(){return this.#undo.length>0;}
  get canRedo(){return this.#redo.length>0;}
  get history(){return this.#undo.map(t=>({kind:t.kind,id:t.id,label:t.label,changes:t.patches.length}));}
@@ -207,7 +209,7 @@ export class RomDocument {
  #recordOwns(kind,id,offset){
   if(kind==='people'){
    const n=PROFILE.names.base+id*16,p=PROFILE.people.base+id*60;
-   return(offset>=n+2&&offset<n+18)||(offset>=p+0x27&&offset<=p+0x2e)||offset===p+0x3b;
+   const portrait=PROFILE.portraits.base+id*16;return(offset>=n+2&&offset<n+18)||(offset>=p+0x27&&offset<=p+0x2e)||offset===p+0x3b||offset===portrait||offset===portrait+1;
   }
   if(kind==='items'){const p=PROFILE.items.base+id*14;return(offset>=p&&offset<p+10)||offset===p+11;}
   if(kind==='castles'){const castle=this.readCastle(id),p=castle.offset,state=castle.state,legacy=PROFILE.castles.base+id*20;return offset>=p&&offset<p+9||id<123&&offset>=legacy&&offset<legacy+9||!!state&&offset>=state.offset+3&&offset<=state.offset+15;}
@@ -216,12 +218,15 @@ export class RomDocument {
  }
  undo(){this.#requireWrite();const t=this.#undo.pop();if(!t)return false;this.#bytes=new Uint8Array(this.#bytes);if(t.beforeLength!==undefined){const b=new Uint8Array(t.beforeLength);b.set(this.#bytes.subarray(0,b.length));this.#bytes=b;}for(const p of t.patches)if(p.offset<this.#bytes.length)this.#bytes[p.offset]=p.before;this.directory=readRomDirectory(this.#bytes);if(t.kind==='factions')this.factionExpansion=readFactionExpansion(this.#bytes,this.directory);this.#redo.push(t);this.revision++;return true;}
  redo(){this.#requireWrite();const t=this.#redo.pop();if(!t)return false;this.#bytes=new Uint8Array(this.#bytes);if(t.afterLength!==undefined){const b=new Uint8Array(t.afterLength);b.set(this.#bytes.subarray(0,b.length));this.#bytes=b;}for(const p of t.patches)if(p.offset<this.#bytes.length)this.#bytes[p.offset]=p.after;this.directory=readRomDirectory(this.#bytes);if(t.kind==='factions')this.factionExpansion=readFactionExpansion(this.#bytes,this.directory);this.#undo.push(t);this.revision++;return true;}
- exportBytes(){this.#requireWrite();
+ #exportBase(){this.#requireWrite();
   validateRom(this.#bytes,{verifyChecksum:false});
   if(this.#undo.some(t=>t.kind.startsWith('map-')))requireWorldMap(this.#bytes);
   const ext=readMapExtension(this.#bytes);if(ext)verifyTownEngine(this.#bytes,ext);
   const permitted=new Set(this.#undo.flatMap(t=>t.patches.map(p=>p.offset)));
   for(let i=0;i<this.#bytes.length;i++)if(this.#bytes[i]!==this.#original[i]&&!permitted.has(i))fail('UNTRACKED_WRITE','存在不属于单条编辑事务的修改',{offset:i});
-  const bytes=isWestRom(this.#bytes)&&worldNavigationDirty(this.#bytes)?rebuildWestNavigation(this.#bytes):new Uint8Array(this.#bytes);const sum=checksum(bytes);bytes[0x18e]=sum>>>8;bytes[0x18f]=sum&255;validateRom(bytes);return bytes;
+  const bytes=isWestRom(this.#bytes)&&worldNavigationDirty(this.#bytes)?rebuildWestNavigation(this.#bytes,{rebuildRoadFields:!!this.roadRouting}):new Uint8Array(this.#bytes);return bytes;
  }
+ #finishExport(bytes){this.#requireWrite();const sum=checksum(bytes);bytes[0x18e]=sum>>>8;bytes[0x18f]=sum&255;validateRom(bytes);return bytes;}
+ exportBytes(){if(this.roadRouting&&worldNavigationDirty(this.#bytes))fail('ASYNC_ROAD_BUILD_REQUIRED','地形已修改，请使用带寻路重建的导出入口');return this.#finishExport(this.#exportBase());}
+ async exportBytesAsync(progress){const revision=this.revision,dirty=this.roadRouting&&worldNavigationDirty(this.#bytes);let bytes=this.#exportBase();if(dirty)bytes=await rebuildRoadFlowAsync(bytes,progress);if(this.revision!==revision)fail('STALE_DRAFT','导出期间资料已变化，请重新导出；当前修改仍然保留');return this.#finishExport(bytes);}
 }

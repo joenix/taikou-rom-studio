@@ -13,6 +13,6 @@ test('declared castle tables: original and extension records edit, export and un
   d.undo();assert.deepEqual(d.workingBytes,b);d.redo();assert.equal(d.readCastle(id).state.size,3);d.undo();
  }
  d.setWriteGuard(()=>false);assert.throws(()=>d.applyRecord('castles',0,{funds:10}),e=>e.code==='READ_ONLY_MODE');d.setWriteGuard(()=>true);
- assert.throws(()=>d.applyRecord('people',0,{affinity:1}),e=>e.code==='READ_ONLY_RESOURCE');
+ assert.throws(()=>d.applyRecord('factions',20,{leaderId:0}),e=>e.code==='READ_ONLY_RESOURCE');
  assert.throws(()=>d.applyMap('map-castle',0,{x:1,y:1}),e=>['READ_ONLY_RESOURCE','ROAD_FLOW_REBUILD_REQUIRED'].includes(e.code));assert.deepEqual(d.workingBytes,b);
 });

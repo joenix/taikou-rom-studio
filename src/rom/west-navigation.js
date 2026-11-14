@@ -71,10 +71,10 @@ export function buildNavigation(bytes,rows,address,spec=L){
 /** A fast content fingerprint for dirty detection, not an authentication digest. */
 export function terrainFingerprint(bytes,rows){let hash=2166136261;for(const r of rows)for(let i=0;i<64;i++)hash=Math.imul(hash^bytes[r.pointer+i],16777619)>>>0;return hash;}
 export function worldNavigationDirty(bytes){const l=readWestLayout(bytes);if(!l)return false;const expected=l.nav?.terrainFingerprint??l.terrainFingerprint;return expected===undefined||terrainFingerprint(bytes,l.rows)!==expected;}
-export function rebuildWestNavigation(bytes){
- requireExternalRoadRebuild(bytes);
+export function rebuildWestNavigation(bytes,{rebuildRoadFields=false}={}){
+ if(!rebuildRoadFields)requireExternalRoadRebuild(bytes);
  const layout=readWestLayout(bytes);if(!layout)return bytes;
- const L=layout;
+ const L=rebuildRoadFields?{...layout,romLimit:0x400000}:layout;
  if(L.navigationStorage==='fixed-capacity-banks')return rebuildFixedNavigation(bytes,L);
  if(L.navigationStorage==='original-maps-appended-banks')return rebuildSplitNavigation(bytes,L);
  const start=layout.nav?.start??bytes.length,size=L.navSlotSize,end=start+size;

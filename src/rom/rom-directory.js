@@ -96,3 +96,12 @@ export function relocateRomDirectoryAfterInsert(bytes,directory,insertAt,amount)
  const put=(at,value)=>bytes.set([(value>>>24)&255,(value>>>16)&255,(value>>>8)&255,value&255],at);
  put(footerAt+12,payloadAt);put(footerAt+20,crc32(payload));cache.delete(bytes);
 }
+
+/** Append a fresh checked directory after generated editor-owned runtime data. */
+export function appendRomDirectory(payload,manifest){
+ const encoded=new TextEncoder().encode(JSON.stringify(manifest)),length=Math.max(0x4000,Math.ceil(encoded.length/4096)*4096);
+ if(length>MAX_MANIFEST||payload.length+length+TRAILER>0x400000)fail('MAP_NAV_CAPACITY','编辑后的寻路数据超过4 MiB ROM容量，请减少地形碎片');
+ const out=new Uint8Array(payload.length+length+TRAILER);out.set(payload);const offset=payload.length,at=offset+length;out.fill(0x20,offset,at);out.set(encoded,offset);out.set(MAGIC,at);out[at+9]=1;out[at+11]=TRAILER;
+ const put=(p,v)=>out.set([v>>>24,v>>>16&255,v>>>8&255,v&255],p);
+ put(at+12,offset);put(at+16,length);put(at+20,crc32(out.subarray(offset,at)));put(0x1a4,out.length-1);readRomDirectory(out);return out;
+}

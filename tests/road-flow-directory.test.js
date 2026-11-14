@@ -28,10 +28,10 @@ test('overview edit/export preserves entire precompiled route resource and reloa
  const next=await RomDocument.load(out);assert.equal(next.overviewSnapshot().pixels[point.y*640+point.x],point.color);assert.equal(next.mapSnapshot().places.towns.length,29);
  assert.equal(d.undo(),true);assert.deepEqual(d.exportBytes(),before);assert.equal(d.redo(),true);assert.deepEqual(d.exportBytes(),out);
 });
-test('precompiled routes reject legacy rebuild and terrain writes atomically',{skip:!available},async()=>{
+test('precompiled routes reject standalone legacy rebuild; editor terrain transactions remain reversible',{skip:!available},async()=>{
  const b=bytes(),d=await RomDocument.load(b);
  assert.throws(()=>rebuildWestNavigation(b),e=>e.code==='ROAD_FLOW_REBUILD_REQUIRED');
- assert.throws(()=>d.applyMap('map-terrain',0,{allowOriginal:true,cells:[{x:1,y:91,code:53}]}),e=>e.code==='ROAD_FLOW_REBUILD_REQUIRED');
+ assert.equal(d.canEditResource('map-terrain'),true);d.applyMap('map-terrain',0,{allowOriginal:true,cells:[{x:1,y:91,code:53}]});if(d.canUndo)d.undo();
  assert.deepEqual(d.workingBytes,b);assert.deepEqual(d.exportBytes(),b);
 });
 test('damaged route hooks and out-of-range directory references are rejected',{skip:!available},()=>{
