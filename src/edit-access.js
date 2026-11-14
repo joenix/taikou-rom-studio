@@ -2,7 +2,16 @@
 export function mobileViewer(w=window,n=navigator){
  return /Android|iPhone|iPad|iPod|Mobile/i.test(n.userAgent)||(/Macintosh/i.test(n.userAgent)&&n.maxTouchPoints>1)||w.matchMedia('(pointer: coarse)').matches||w.matchMedia('(max-width: 900px)').matches;
 }
+// A salted, deliberately expensive verifier; the password itself is never shipped.
+// This remains a local UI gate: a client under someone else's control can bypass it.
+const unlockSalt='c63a9d7134525e3963824a1886218945';
+const unlockVerifier='507b895568b5c6fa9425e3ff81c0480abf07903dcdd28301253155cbf29f4045';
+const hexBytes=value=>Uint8Array.from(value.match(/../g),pair=>Number.parseInt(pair,16));
 export async function validPassword(value){
- const bytes=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value));
- return Array.from(new Uint8Array(bytes),v=>v.toString(16).padStart(2,'0')).join('')==='71363f3965bc1f135464b317cc6b1ef5596e9e2865682363635c85983f7dacb2';
+ if(typeof value!=='string'||!value.length)return false;
+ const key=await crypto.subtle.importKey('raw',new TextEncoder().encode(value),'PBKDF2',false,['deriveBits']);
+ const bits=await crypto.subtle.deriveBits({name:'PBKDF2',hash:'SHA-256',salt:hexBytes(unlockSalt),iterations:600000},key,256);
+ const actual=new Uint8Array(bits),expected=hexBytes(unlockVerifier);
+ let difference=0;for(let i=0;i<expected.length;i++)difference|=actual[i]^expected[i];
+ return difference===0;
 }

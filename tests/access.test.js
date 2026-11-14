@@ -24,3 +24,10 @@ test('仅接受新版标题及修复签名，拒绝旧标题和损坏补丁',()=
  const old=fixture();old.set(Buffer.from('91be8d7d97a78e559360','hex'),0x120);assert.throws(()=>validateRom(old),e=>e.code==='NOT_TAIKOU');
  const bad=fixture();bad[0x1583ae]^=1;assert.throws(()=>validateRom(bad),e=>e.code==='UNSUPPORTED_LAYOUT');
 });
+
+test('配置的真实密码可解锁，大小写和附加空格不接受',{skip:!process.env.TAIKOU_EDITOR_PASSWORD},async()=>{
+ const secret=process.env.TAIKOU_EDITOR_PASSWORD;
+ assert.equal(await validPassword(secret),true);
+ assert.equal(await validPassword(secret+' '),false);
+ assert.equal(await validPassword(secret.toUpperCase()),false);
+});
