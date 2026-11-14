@@ -49,8 +49,8 @@ export function makeTownInteriorPatches(bytes,id,draft){
   for(let y=0;y<r.height;y++)for(let x=0;x<r.width;x++)cells[(target.y+y)*32+target.x+x]=copy[y*r.width+x];
   for(const f of m.facilities)if(contains(r,f.door.x,f.door.y)){const x=f.door.x+dx,y=f.door.y+dy,sid=m.base+(y>>>3)*41+(x>>>3);add(f.offset+2,sid>>>8);add(f.offset+3,sid&255);add(f.offset+4,x&7);add(f.offset+5,y&7);moved.set(f.record,{x,y});}
  }else if(draft.action==='paint'){
-  const r=bounds(draft.rect);if(!TOWN_PAINTABLE.includes(draft.code))fail('INVALID_TOWN_PAINT','请选择地形图块');
-  for(let y=r.y;y<r.y+r.height;y++)for(let x=r.x;x<r.x+r.width;x++){if(m.spawns.some(p=>p.x===x&&p.y===y)||cells[y*32+x]===105)fail('TOWN_ENTRY_PROTECTED','町入口和出口不可覆盖');if(m.buildings.some(f=>contains(f,x,y))||!TOWN_PAINTABLE.includes(cells[y*32+x]))fail('TOWN_BUILDING_PROTECTED','建筑请整栋移动，不能用地形覆盖');cells[y*32+x]=draft.code;}
+  let points;if(draft.cells!==undefined){if(!Array.isArray(draft.cells)||!draft.cells.length||draft.cells.length>768)fail('INVALID_TOWN_PAINT','每笔应为1至768格');points=draft.cells.map(p=>{integer(p.x,0,31,'X');integer(p.y,0,23,'Y');return p;});}else{const r=bounds(draft.rect);points=[];for(let y=r.y;y<r.y+r.height;y++)for(let x=r.x;x<r.x+r.width;x++)points.push({x,y});}if(!TOWN_PAINTABLE.includes(draft.code))fail('INVALID_TOWN_PAINT','请选择地形图块');
+  for(const {x,y}of points){if(m.spawns.some(p=>p.x===x&&p.y===y)||cells[y*32+x]===105)fail('TOWN_ENTRY_PROTECTED','町入口和出口不可覆盖');if(m.buildings.some(f=>contains(f,x,y))||!TOWN_PAINTABLE.includes(cells[y*32+x]))fail('TOWN_BUILDING_PROTECTED','建筑请整栋移动，不能用地形覆盖');cells[y*32+x]=draft.code;}
  }else fail('INVALID_TOWN_EDIT','不支持的町内编辑操作');
  for(const seed of m.spawns){const old=reach(m.cells,seed),next=reach(cells,seed);
   const adjacent=(i,seen)=>{const x=i%32,y=Math.floor(i/32);return [[x,y-1],[x+1,y],[x,y+1],[x-1,y]].some(([xx,yy])=>xx>=0&&xx<32&&yy>=0&&yy<24&&seen.has(yy*32+xx));};
