@@ -1,3 +1,4 @@
+import {townEditSnapshot,makeTownInteriorPatches} from './town-edit.js';
 import {verifyRuntimeResources} from './resource-contracts.js';
 import {overviewCapability,readOverview,overviewPatches} from './overview.js';
 import {isWestRom,worldLayoutSpec} from './west-layout.js';
@@ -20,7 +21,7 @@ import {span,u16,decodeText,encodeField,integer,fail,checksum} from './codec.js'
 export class RomDocument {
  #original;#bytes;#imported;#undo=[];#redo=[];#writeGuard=()=>true;
  setWriteGuard(guard){this.#writeGuard=guard;}
- #requireWrite(resource=null){if(this.editPolicy==='readonly-trial')fail('READ_ONLY_ROM','这份试玩 ROM 暂仅支持浏览，编辑导出尚未开放');if(resource?.startsWith('map-'))requireExternalRoadRebuild(this.#bytes);if(this.editPolicy==='overview-only'&&resource&&resource!=='overview')fail('READ_ONLY_RESOURCE','当前 ROM 仅开放势力图绘制');if(!this.#writeGuard())fail("READ_ONLY_MODE","当前设备或模式仅支持查看");}
+ #requireWrite(resource=null){if(this.editPolicy==='readonly-trial')fail('READ_ONLY_ROM','这份试玩 ROM 暂仅支持浏览，编辑导出尚未开放');if(resource?.startsWith('map-'))requireExternalRoadRebuild(this.#bytes);if(this.editPolicy==='overview-only'&&resource&&!['overview','town-interior'].includes(resource))fail('READ_ONLY_RESOURCE','当前 ROM 开放势力图与町内地图编辑');if(!this.#writeGuard())fail("READ_ONLY_MODE","当前设备或模式仅支持查看");}
  constructor(bytes,filename,sha256,importedBytes=bytes){
   this.validation=validateRom(bytes);this.directory=this.validation.directory||readRomDirectory(bytes);const ext=readMapExtension(bytes);if(ext){verifyTownEngine(bytes,ext);requireWorldMap(bytes);}this.#imported=new Uint8Array(importedBytes);this.#original=new Uint8Array(bytes);this.#bytes=new Uint8Array(bytes);
   this.runtimeResources=verifyRuntimeResources(bytes,this.directory);this.appearance=readAppearance(bytes);this.factionExpansion=readFactionExpansion(bytes,this.directory);this.residentBindings=residentBindings(bytes,this.directory);this.newOfficerIds=new Set(this.residentBindings.keys());this.filename=filename;this.sha256=sha256;this.revision=0;
@@ -78,6 +79,14 @@ export class RomDocument {
   const x0=Math.max(0,Math.min(rect.x0,rect.x1)),x1=Math.min(127,Math.max(rect.x0,rect.x1)),y0=Math.max(0,Math.min(rect.y0,rect.y1)),y1=Math.min(223,Math.max(rect.y0,rect.y1));
   for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)if(!m.protectedPixel(x,y)&&m.pixels[y*640+x]!==base.pixels[y*640+x])cells.push({x,y,color:base.pixels[y*640+x]});
   return this.applyOverview(cells,expectedRevision);
+ }
+ townInteriorSnapshot(id){return townEditSnapshot(this.#bytes,id);}
+ applyTownInterior(id,draft,expectedRevision=this.revision){this.#requireWrite('town-interior');
+  if(expectedRevision!==this.revision)fail('STALE_DRAFT','町内地图已变化，请重新选择');
+  const result=makeTownInteriorPatches(this.#bytes,id,draft);if(!result.patches.length)return false;
+  const candidate=this.#bytes.slice();for(const p of result.patches)candidate[p.offset]=p.after;
+  validateRom(candidate,{verifyChecksum:false});townEditSnapshot(candidate,id);
+  this.#bytes=candidate;this.#undo.push({kind:'town-interior',id,label:result.label,patches:result.patches});this.#redo=[];this.revision++;return true;
  }
  get townCapability(){return isWestRom(this.#bytes)?{supported:false,error:{message:'当前扩展版支持浏览已有町，本阶段不新增町'}}:townEngineCapability(this.#bytes);}
  get mapExtension(){return readMapExtension(this.#bytes);}

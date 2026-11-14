@@ -9,7 +9,7 @@ export function readMapExtension(bytes){
  const limit=bytes.length;
  let found=false;
  for(let footer=limit-16;footer>=0;footer--){
-  if(ascii.decode(bytes.subarray(footer,footer+8))!==MAGIC)continue;found=true;
+  if(bytes[footer]!==84||ascii.decode(bytes.subarray(footer,footer+8))!==MAGIC)continue;found=true;
   const offset=u16(bytes,footer+8)*65536+u16(bytes,footer+10),size=u16(bytes,footer+12)*65536+u16(bytes,footer+14);
   if(size!==EXTENSION_MANIFEST_SIZE||offset+size!==footer)continue;
   let meta;try{meta=JSON.parse(ascii.decode(span(bytes,offset,size)).replace(/\0+$/,''));}catch{continue;}
